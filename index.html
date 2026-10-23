@@ -1,0 +1,1127 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#f5f7fc">
+<title>SMM Panel</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<link rel="preconnect" href="https://cdn.tailwindcss.com" crossorigin>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="dns-prefetch" href="https://quickchart.io">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet"></noscript>
+<script>
+tailwind.config = { darkMode: 'class', theme: { extend: {
+  fontFamily: { sans: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'], mono: ['"JetBrains Mono"', 'monospace'] },
+  colors: { ink: '#f5f7fc', panel: '#232834', brand: { 400: '#a78bfa', 500: '#8b5cf6', 600: '#7c3aed' } },
+  keyframes: {
+    float: { '0%,100%': { transform: 'translate3d(0,0,0) scale(1)' }, '50%': { transform: 'translate3d(30px,-40px,0) scale(1.15)' } },
+    rise: { from: { opacity: 0, transform: 'translateY(14px)' }, to: { opacity: 1, transform: 'translateY(0)' } },
+    shimmer: { '100%': { transform: 'translateX(100%)' } },
+    pop: { '0%': { transform: 'scale(.6)', opacity: 0 }, '70%': { transform: 'scale(1.08)' }, '100%': { transform: 'scale(1)', opacity: 1 } },
+    sheet: { from: { transform: 'translateY(100%)' }, to: { transform: 'translateY(0)' } },
+    spin2: { to: { transform: 'rotate(360deg)' } }
+  },
+  animation: { float: 'float 14s ease-in-out infinite', rise: 'rise .45s cubic-bezier(.2,.8,.2,1) both', pop: 'pop .5s cubic-bezier(.2,.8,.2,1) both', sheet: 'sheet .35s cubic-bezier(.2,.8,.2,1) both' }
+} } }
+</script>
+<style>
+  :root { --bg:#f5f7fc; --txt:#0f172a; --muted:#64748b; --line:#e6eaf2; --acc:#7c3aed; }
+  html, body { height:100%; background:var(--bg); -webkit-tap-highlight-color:transparent; overscroll-behavior:none; }
+  body { font-family:'Plus Jakarta Sans',system-ui,sans-serif; color:var(--txt); -webkit-font-smoothing:antialiased; }
+  body::before { content:''; position:fixed; inset:0; z-index:0; pointer-events:none;
+    background:radial-gradient(60% 40% at 92% -5%,rgba(167,139,250,.30),transparent 70%),radial-gradient(50% 35% at -10% 12%,rgba(56,189,248,.18),transparent 70%),radial-gradient(60% 40% at 50% 112%,rgba(244,114,182,.16),transparent 70%); }
+  ::-webkit-scrollbar { width:0; height:0; }
+  .glass { background:#fff; border:1px solid var(--line); box-shadow:0 1px 2px rgba(15,23,42,.04),0 12px 28px -14px rgba(76,29,149,.16); }
+  .glass-strong { background:rgba(255,255,255,.88); -webkit-backdrop-filter:blur(18px); backdrop-filter:blur(18px); border:1px solid var(--line); box-shadow:0 1px 2px rgba(15,23,42,.04),0 14px 34px -14px rgba(76,29,149,.22); }
+  .grad-text { background:linear-gradient(120deg,#6d28d9,#c026d3 60%,#e11d74); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .grad-btn { background:linear-gradient(135deg,#7c5cff,#6d3df5 55%,#9333ea); color:#fff; border:none; box-shadow:0 10px 22px -8px rgba(109,61,245,.6),inset 0 1px 0 rgba(255,255,255,.28); transition:transform .15s,box-shadow .15s,filter .15s; }
+  .grad-btn:active { transform:scale(.97); filter:brightness(.95); box-shadow:0 4px 10px -4px rgba(109,61,245,.6); }
+  .btn-soft { background:#fff; border:1px solid var(--line); color:#1e293b; box-shadow:0 1px 2px rgba(15,23,42,.05),0 6px 14px -8px rgba(15,23,42,.18); transition:transform .15s,box-shadow .15s; }
+  .btn-soft:active { transform:scale(.97); background:#f8fafc; }
+  .card-hover { transition:transform .15s ease,box-shadow .15s ease; }
+  .card-hover:active { transform:scale(.982); }
+  .field { background:#fff; border:1px solid #dfe5ef; color:var(--txt); box-shadow:0 1px 2px rgba(15,23,42,.04); transition:border-color .2s,box-shadow .2s; }
+  .field:focus { outline:none; border-color:#8b5cf6; box-shadow:0 0 0 4px rgba(139,92,246,.16); }
+  .field::placeholder { color:#94a3b8; }
+  .chip-on { background:#f3efff !important; color:#6d28d9 !important; border:1px solid #d9ccff !important; }
+  .toggle { width:50px; height:28px; border-radius:999px; background:#dbe1ec; position:relative; transition:all .25s; flex:none; }
+  .toggle::after { content:''; position:absolute; top:3px; left:3px; width:22px; height:22px; border-radius:50%; background:#fff; box-shadow:0 2px 5px rgba(15,23,42,.3); transition:transform .25s; }
+  .toggle.on { background:linear-gradient(135deg,#8b5cf6,#6d3df5); }
+  .toggle.on::after { transform:translateX(22px); }
+  [style*="background:rgba(255,255,255,.05)"],[style*="background:rgba(255,255,255,.06)"],[style*="background:rgba(255,255,255,.07)"],[style*="background:rgba(255,255,255,.08)"] { background:#f6f8fc !important; border:1px solid #ebeff6 !important; }
+  /* gradient hero cards keep white text */
+  [style*="gradient(135deg,#"] { color:#fff; box-shadow:0 18px 36px -16px rgba(109,40,217,.55); }
+  [style*="gradient(135deg,#"] [class*="text-white"], [style*="gradient(135deg,#"] .ico { color:rgba(255,255,255,.92) !important; }
+  /* light-theme remap of dark utility classes */
+  .text-white { color:#0f172a !important; }
+  .text-white\/80,.text-white\/75,.text-white\/70,.text-white\/65,.text-white\/60 { color:#475569 !important; }
+  .text-white\/55,.text-white\/50 { color:#64748b !important; }
+  .text-white\/45,.text-white\/40,.text-white\/35,.text-white\/30 { color:#94a3b8 !important; }
+  .grad-btn.grad-btn, .grad-btn [class*="text-white"], .grad-btn .ico { color:#fff !important; }
+  .text-rose-300 { color:#be123c !important; } .text-rose-200 { color:#9f1239 !important; }
+  .text-emerald-300 { color:#047857 !important; } .text-sky-300 { color:#0369a1 !important; }
+  .text-amber-300 { color:#b45309 !important; } .text-amber-200 { color:#92400e !important; }
+  .text-orange-300 { color:#c2410c !important; } .text-brand-400 { color:#7c3aed !important; }
+  .bg-white\/8,.bg-white\/10,.bg-white\/15 { background:#eef1f7 !important; }
+  .bg-white\/20 { background:#cbd5e1 !important; }
+  .bg-black\/70 { background:rgba(15,23,42,.38) !important; }
+  [class*="border-white"] { border-color:#e6eaf2 !important; }
+  .skeleton { position:relative; overflow:hidden; background:#e9edf5; border-radius:18px; }
+  .skeleton::after { content:''; position:absolute; inset:0; transform:translateX(-100%); background:linear-gradient(90deg,transparent,rgba(255,255,255,.8),transparent); animation:shimmer 1.4s infinite; }
+  .safe-bottom { padding-bottom:max(env(safe-area-inset-bottom),10px); }
+  .spinner { width:18px; height:18px; border-radius:50%; border:2.5px solid rgba(124,58,237,.25); border-top-color:#7c3aed; animation:spin2 .7s linear infinite; display:inline-block; }
+  .grad-btn .spinner { border-color:rgba(255,255,255,.4); border-top-color:#fff; }
+  input, textarea, select { font-family:inherit; }
+  .tab-ico { transition:all .25s; }
+  .tab-active { color:#6d28d9 !important; }
+  .tab-active .tab-ico { background:linear-gradient(135deg,#ede9fe,#f5f3ff); color:#6d28d9; box-shadow:inset 0 0 0 1px #ddd6fe,0 6px 14px -8px rgba(109,40,217,.5); }
+  .stagger > * { animation:rise .45s cubic-bezier(.2,.8,.2,1) both; }
+  .stagger > *:nth-child(2){animation-delay:.04s} .stagger > *:nth-child(3){animation-delay:.08s}
+  .stagger > *:nth-child(4){animation-delay:.12s} .stagger > *:nth-child(5){animation-delay:.16s}
+  .stagger > *:nth-child(6){animation-delay:.2s} .stagger > *:nth-child(n+7){animation-delay:.24s}
+  .line-clamp-2 { display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+  #sheet { box-shadow:0 -14px 50px rgba(15,23,42,.22); }
+  /* icons */
+  .ico { width:1em; height:1em; display:inline-block; vertical-align:-.14em; flex:none; }
+  .sdot { display:inline-block; width:.55em; height:.55em; border-radius:50%; vertical-align:.02em; }
+  .ico-tile { width:44px; height:44px; border-radius:14px; display:flex; align-items:center; justify-content:center; font-size:22px; color:#6d28d9; background:linear-gradient(135deg,#f3eeff,#e8e0ff); box-shadow:inset 0 0 0 1px rgba(139,92,246,.16); }
+  .big-ico { width:76px; height:76px; border-radius:26px; display:flex; align-items:center; justify-content:center; font-size:36px; color:#7c3aed; background:linear-gradient(135deg,#f3eeff,#fde7f3); box-shadow:inset 0 0 0 1px rgba(139,92,246,.14),0 14px 28px -16px rgba(124,58,237,.5); }
+  .toast-x { background:#fff; color:#0f172a; border:1px solid var(--line); border-left:4px solid var(--tc); box-shadow:0 16px 36px -12px rgba(15,23,42,.3); }
+  .toast-ic { color:var(--tc); font-size:18px; line-height:1; margin-top:1px; }
+</style>
+  <script src="/config.js"></script>
+</head>
+<body class="text-slate-900">
+
+<!-- Blocked screen (outside Telegram) -->
+<div id="blocked" class="hidden fixed inset-0 z-[100] bg-ink flex items-center justify-center p-8 text-center">
+  <div class="max-w-xs animate-pop">
+    <div class="mx-auto w-24 h-24 rounded-3xl grad-btn flex items-center justify-center text-5xl mb-6">🔒</div>
+    <h1 class="text-2xl font-extrabold mb-2">Open in Telegram</h1>
+    <p class="text-white/60 text-sm leading-relaxed" id="blockedMsg">This app only works inside Telegram. Open our bot and tap the app button.</p>
+  </div>
+</div>
+
+<div id="app" class="relative z-10 max-w-xl mx-auto min-h-full flex flex-col">
+  <header id="topbar" class="sticky top-0 z-30 px-4 pt-3 pb-2 hidden">
+    <div class="glass-strong rounded-2xl px-3 py-2.5 flex items-center gap-3">
+      <button id="backBtn" class="hidden w-9 h-9 rounded-xl btn-soft flex items-center justify-center text-lg" onclick="goBack()">‹</button>
+      <div class="flex-1 min-w-0">
+        <div id="topTitle" class="font-extrabold text-[15px] truncate grad-text">SMM Panel</div>
+        <div id="topSub" class="text-[11px] text-white/45 truncate"></div>
+      </div>
+      <button onclick="go('funds')" class="rounded-xl px-3 py-1.5 btn-soft flex items-center gap-2 active:scale-95 transition">
+        <span class="text-sm">👛</span>
+        <span id="balPill" class="font-mono text-[13px] font-bold">—</span>
+        <span class="w-6 h-6 rounded-lg grad-btn text-[14px] leading-6 text-center font-bold">+</span>
+      </button>
+    </div>
+  </header>
+
+  <main id="view" class="flex-1 px-4 pb-32 pt-2"></main>
+</div>
+
+<!-- Bottom nav -->
+<nav id="nav" class="hidden fixed bottom-0 inset-x-0 z-40 safe-bottom px-3">
+  <div class="max-w-xl mx-auto glass-strong rounded-[28px] px-2 pt-2.5 pb-2 flex justify-around"></div>
+</nav>
+
+<!-- Sheet -->
+<div id="sheetWrap" class="hidden fixed inset-0 z-50">
+  <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" onclick="closeSheet()"></div>
+  <div id="sheet" class="absolute bottom-0 inset-x-0 max-w-xl mx-auto glass-strong rounded-t-[32px] p-5 safe-bottom animate-sheet max-h-[90vh] overflow-y-auto">
+    <div class="w-11 h-1.5 rounded-full bg-white/20 mx-auto mb-4"></div>
+    <div id="sheetBody"></div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toastHost" class="fixed top-3 inset-x-0 z-[90] flex flex-col items-center gap-2 pointer-events-none px-4"></div>
+
+<script>
+/* ===================== core ===================== */
+const tg = window.Telegram && Telegram.WebApp;
+const S = { me: null, boot: null, stack: [], route: 'home', params: {}, admin: false, cache: {} };
+const $ = (s, r = document) => r.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const view = () => $('#view');
+
+function haptic(t = 'light') { try { tg.HapticFeedback.impactOccurred(t); } catch (e) {} }
+function notifyH(t = 'success') { try { tg.HapticFeedback.notificationOccurred(t); } catch (e) {} }
+
+function toast(msg, kind = 'info') {
+  const colors = { info: '#7c3aed', ok: '#059669', err: '#e11d48' };
+  const ico = { info: '✨', ok: '✅', err: '⚠️' };
+  const el = document.createElement('div');
+  el.className = 'animate-pop pointer-events-auto max-w-sm w-full rounded-2xl px-4 py-3 text-sm font-semibold flex gap-2.5 items-start toast-x';
+  el.style.setProperty('--tc', colors[kind]);
+  el.innerHTML = `<span class="toast-ic">${ico[kind]}</span><span class="flex-1">${esc(msg)}</span>`;
+  $('#toastHost').appendChild(el);
+  if (kind === 'err') notifyH('error'); else if (kind === 'ok') notifyH('success');
+  setTimeout(() => { el.style.transition = 'all .3s'; el.style.opacity = 0; el.style.transform = 'translateY(-10px)'; setTimeout(() => el.remove(), 300); }, 3200);
+}
+
+const API_BASE = String(window.WEBAPP_API_BASE || '').replace(/\/+$/, '');
+async function api(path, opts = {}) {
+  const init = tg ? tg.initData : '';
+  const o = { method: opts.method || 'GET', headers: { 'X-Init-Data': init } };
+  if (opts.body !== undefined) { o.method = 'POST'; o.headers['Content-Type'] = 'application/json'; o.body = JSON.stringify(opts.body); }
+  let r;
+  try { r = await fetch(`${API_BASE}${path}`, o); } catch (e) { throw new Error('Network error. Check your connection.'); }
+  let j = {};
+  try { j = await r.json(); } catch (e) {}
+  if (r.status === 401) { showBlocked(); throw new Error('Open inside Telegram'); }
+  if (r.status === 403 && j.code === 'banned') { showBlocked('Your account is suspended. Please contact support.'); throw new Error(j.error); }
+  if (!r.ok || j.ok === false) { const e = new Error(j.error || 'Something went wrong'); e.code = j.code; e.data = j; throw e; }
+  return j;
+}
+
+function showBlocked(msg) { if (msg) $('#blockedMsg').textContent = msg; $('#blocked').classList.remove('hidden'); $('#blocked').classList.add('flex'); }
+
+/* ===================== money ===================== */
+function money(inr, forceCur) {
+  const cur = forceCur || (S.me && S.me.currency) || 'INR';
+  const n = parseFloat(inr || 0);
+  if (cur === 'USD') { const r = parseFloat(S.boot.usd_rate || 0); return '$' + (r > 0 ? n / r : n).toFixed(2); }
+  return '₹' + n.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+const num = n => Number(n || 0).toLocaleString('en-IN');
+const statusMeta = {
+  'Pending': ['🟡', 'bg-amber-50 text-amber-700 border-amber-200'],
+  'Processing': ['🔵', 'bg-sky-50 text-sky-700 border-sky-200'],
+  'In Progress': ['🔵', 'bg-sky-50 text-sky-700 border-sky-200'],
+  'Completed': ['🟢', 'bg-emerald-50 text-emerald-700 border-emerald-200'],
+  'Partial': ['🟠', 'bg-orange-50 text-orange-700 border-orange-200'],
+  'Cancelled': ['🔴', 'bg-rose-50 text-rose-700 border-rose-200'],
+  'Failed': ['❌', 'bg-rose-50 text-rose-700 border-rose-200'],
+  'PENDING': ['🟡', 'bg-amber-50 text-amber-700 border-amber-200'],
+  'APPROVED': ['🟢', 'bg-emerald-50 text-emerald-700 border-emerald-200'],
+  'REJECTED': ['🔴', 'bg-rose-50 text-rose-700 border-rose-200'],
+  'EXPIRED': ['⏰', 'bg-slate-100 text-slate-600 border-slate-200'],
+  'CANCELLED': ['🔴', 'bg-rose-50 text-rose-700 border-rose-200'],
+  'FAILED': ['❌', 'bg-rose-50 text-rose-700 border-rose-200'],
+  'DUPLICATE': ['⚠️', 'bg-orange-50 text-orange-700 border-orange-200'],
+};
+const badge = st => { const m = statusMeta[st] || ['⚪', 'bg-slate-100 text-slate-600 border-slate-200']; return `<span class="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-1 rounded-full border ${m[1]}">${m[0]} ${esc(st)}</span>`; };
+
+const skel = (n = 4, h = 'h-20') => `<div class="space-y-3">${Array.from({ length: n }, () => `<div class="skeleton ${h}"></div>`).join('')}</div>`;
+const empty = (ico, t, s = '') => `<div class="text-center py-16 animate-rise"><div class="big-ico mx-auto mb-3">${ico}</div><div class="font-bold text-lg">${t}</div><div class="text-white/50 text-sm mt-1">${s}</div></div>`;
+const btn = (label, onclick, cls = 'grad-btn', extra = '') => `<button ${extra} onclick="${onclick}" class="${cls} w-full rounded-2xl py-3.5 font-bold text-[15px] transition active:scale-[.98] disabled:opacity-50">${label}</button>`;
+
+async function withBtn(el, fn) {
+  if (el.dataset.busy) return; el.dataset.busy = 1;
+  const html = el.innerHTML; el.innerHTML = '<span class="spinner"></span>'; el.disabled = true;
+  try { return await fn(); } finally { el.innerHTML = html; el.disabled = false; delete el.dataset.busy; }
+}
+
+/* ===================== navigation ===================== */
+const TABS = [
+  { id: 'home', ico: '🏠', label: 'Home' },
+  { id: 'services', ico: '🛍️', label: 'Services' },
+  { id: 'orders', ico: '📦', label: 'Orders' },
+  { id: 'funds', ico: '💰', label: 'Funds' },
+  { id: 'profile', ico: '👤', label: 'Me' },
+];
+const ROOTS = ['home', 'services', 'orders', 'funds', 'profile', 'admin'];
+
+function renderNav() {
+  const tabs = S.me.is_admin ? [...TABS.slice(0, 4), { id: 'admin', ico: '🛡️', label: 'Admin' }, TABS[4]] : TABS;
+  const root = S.route.startsWith('admin') ? 'admin' : (S.route.startsWith('track') ? 'orders' : (S.route.startsWith('svc') || S.route.startsWith('order') || S.route.startsWith('cat') ? 'services' : S.route));
+  $('#nav > div').innerHTML = tabs.map(t => `
+    <button onclick="go('${t.id}')" class="flex-1 flex flex-col items-center gap-1 py-1 ${root === t.id ? 'tab-active' : 'text-white/45'} transition">
+      <span class="tab-ico w-11 h-10 rounded-2xl flex items-center justify-center text-[19px]">${t.ico}</span>
+      <span class="text-[10px] font-bold tracking-wide">${t.label}</span>
+    </button>`).join('');
+}
+
+function go(route, params = {}, push = true) {
+  haptic();
+  if (push && !(ROOTS.includes(route) && ROOTS.includes(S.route))) S.stack.push({ route: S.route, params: S.params });
+  if (ROOTS.includes(route)) S.stack = [];
+  S.route = route; S.params = params;
+  render();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+function goBack() {
+  haptic();
+  const p = S.stack.pop();
+  if (p) { S.route = p.route; S.params = p.params; render(); } else go('home', {}, false);
+}
+
+function setTop(title, sub = '', back = false) {
+  $('#topTitle').textContent = title; $('#topSub').textContent = sub;
+  $('#backBtn').classList.toggle('hidden', !back);
+  if (tg) { try { back ? tg.BackButton.show() : tg.BackButton.hide(); } catch (e) {} }
+}
+
+function render() {
+  renderNav();
+  $('#balPill').textContent = money(S.me.balance);
+  const r = S.route;
+  const map = { home: vHome, services: vServices, cat: vCatServices, svc: vService, orders: vOrders, track: vTrack, funds: vFunds,
+    dep_auto: vDepAuto, dep_manual: vDepManual, dep_usdt: vDepUsdt, profile: vProfile, history: vHistory, gift: vGift, support: vSupport,
+    admin: vAdmin, admin_orders: vAdminOrders, admin_order: vAdminOrder, admin_users: vAdminUsers, admin_user: vAdminUser,
+    admin_deposits: vAdminDeposits, admin_services: vAdminServices, admin_gifts: vAdminGifts, admin_settings: vAdminSettings,
+    admin_providers: vAdminProviders, admin_broadcast: vAdminBroadcast, admin_categories: vAdminCategories,
+    admin_add_service: vAdminAddService, admin_prov_services: vAdminProvServices };
+  (map[r] || vHome)();
+}
+
+async function refreshMe() {
+  try { const j = await api('/api/bootstrap'); S.boot = j; S.me = j.me; $('#balPill').textContent = money(S.me.balance); } catch (e) {}
+}
+
+function sheet(html) { $('#sheetBody').innerHTML = html; $('#sheetWrap').classList.remove('hidden'); haptic(); }
+function closeSheet() { $('#sheetWrap').classList.add('hidden'); }
+
+function maintenanceBanner() {
+  const m = S.boot.maintenance;
+  if (!(m.full || m.order || m.deposit || m.service)) return '';
+  return `<div class="glass rounded-2xl p-3.5 mb-4 flex gap-3 items-center border-amber-400/30"><span class="text-2xl">🛠️</span><div class="text-sm"><b>Maintenance</b><div class="text-white/60 text-xs">Some features are temporarily unavailable.</div></div></div>`;
+}
+
+/* ===================== HOME ===================== */
+async function vHome() {
+  setTop(S.boot.bot_name || 'SMM Panel', 'Premium social growth', false);
+  const m = S.me, cats = S.boot.categories;
+  const icons = ['✨', '🚀', '💎', '🔥', '⚡', '🌟', '🎯', '🏆'];
+  view().innerHTML = `
+  <div class="stagger space-y-4">
+    ${maintenanceBanner()}
+    <div class="relative overflow-hidden rounded-[28px] p-5" style="background:linear-gradient(135deg,#6d28d9 0%,#a21caf 55%,#db2777 100%)">
+      <div class="absolute -right-10 -top-10 w-44 h-44 rounded-full bg-white/15 blur-2xl"></div>
+      <div class="absolute -left-8 -bottom-12 w-40 h-40 rounded-full bg-cyan-300/20 blur-2xl"></div>
+      <div class="relative">
+        <div class="text-white/75 text-xs font-semibold">Welcome back,</div>
+        <div class="text-2xl font-extrabold leading-tight">${esc(m.first_name)} <span class="inline-block animate-pop">👋</span></div>
+        <div class="mt-5 flex items-end justify-between">
+          <div><div class="text-white/70 text-[11px] font-semibold uppercase tracking-widest">Wallet balance</div>
+          <div class="text-[34px] font-extrabold font-mono leading-none mt-1">${money(m.balance)}</div></div>
+          <button onclick="go('funds')" class="bg-white text-violet-700 font-extrabold text-sm rounded-2xl px-4 py-2.5 shadow-xl active:scale-95 transition">+ Add Funds</button>
+        </div>
+      </div>
+    </div>
+    <div class="grid grid-cols-4 gap-2.5">
+      ${[['🛍️', 'Order', "go('services')"], ['📦', 'Orders', "go('orders')"], ['🎁', 'Gift', "go('gift')"], ['💬', 'Support', "go('support')"]].map(a => `
+      <button onclick="${a[2]}" class="glass rounded-2xl py-3.5 flex flex-col items-center gap-1.5 card-hover"><span class="ico-tile">${a[0]}</span><span class="text-[11px] font-bold text-white/80">${a[1]}</span></button>`).join('')}
+    </div>
+    ${S.boot.discount.on ? `<div class="rounded-2xl p-4 flex items-center gap-3" style="background:linear-gradient(135deg,rgba(16,185,129,.25),rgba(34,211,238,.18));border:1px solid rgba(52,211,153,.35)"><span class="text-3xl">🎁</span><div><div class="font-extrabold">${esc(S.boot.discount.pct)}% OFF everything</div><div class="text-xs text-white/65">Discount is applied automatically to all services.</div></div></div>` : ''}
+    <div>
+      <div class="flex items-center justify-between mb-3"><h2 class="font-extrabold text-lg">Categories</h2><button onclick="go('services')" class="text-xs font-bold text-brand-400">See all →</button></div>
+      <div class="grid grid-cols-2 gap-3">
+        ${cats.length ? cats.slice(0, 6).map((c, i) => `
+        <button onclick="go('cat',{id:${c.id},name:'${esc(c.name).replace(/'/g, '')}'})" class="glass rounded-2xl p-4 text-left card-hover relative overflow-hidden">
+          <div class="absolute -right-4 -bottom-4 text-6xl opacity-10">${esc(c.icon || icons[i % 8])}</div>
+          <div class="ico-tile mb-3">${esc(c.icon || icons[i % 8])}</div>
+          <div class="font-bold text-sm leading-tight line-clamp-2">${esc(c.name)}</div>
+          <div class="text-[11px] text-white/45 mt-1">${c.cnt} services</div>
+        </button>`).join('') : empty('🛍️', 'No categories yet', 'Check back soon.')}
+      </div>
+    </div>
+    <div id="recent"></div>
+  </div>`;
+  try {
+    const j = await api('/api/orders?page=1');
+    if (j.orders.length) $('#recent').innerHTML = `
+      <div class="flex items-center justify-between mb-3"><h2 class="font-extrabold text-lg">Recent orders</h2><button onclick="go('orders')" class="text-xs font-bold text-brand-400">View all →</button></div>
+      <div class="space-y-2.5">${j.orders.slice(0, 3).map(orderRow).join('')}</div>`;
+  } catch (e) {}
+}
+
+/* ===================== SERVICES ===================== */
+function vServices() {
+  setTop('Services', 'Pick a category or search', false);
+  const icons = ['✨', '🚀', '💎', '🔥', '⚡', '🌟', '🎯', '🏆'];
+  const cats = S.boot.categories;
+  view().innerHTML = `
+  <div class="space-y-4">
+    ${maintenanceBanner()}
+    <div class="relative"><span class="absolute left-4 top-1/2 -translate-y-1/2 text-white/40">🔎</span>
+      <input id="q" oninput="debSearch()" placeholder="Search all services…" class="field w-full rounded-2xl pl-11 pr-4 py-3.5 text-sm text-white placeholder-white/35"></div>
+    <div id="svcOut" class="stagger grid grid-cols-2 gap-3">
+      ${cats.length ? cats.map((c, i) => `
+      <button onclick="go('cat',{id:${c.id},name:'${esc(c.name).replace(/'/g, '')}'})" class="glass rounded-2xl p-4 text-left card-hover relative overflow-hidden">
+        <div class="absolute -right-4 -bottom-4 text-6xl opacity-10">${esc(c.icon || icons[i % 8])}</div>
+        <div class="ico-tile mb-3">${esc(c.icon || icons[i % 8])}</div>
+        <div class="font-bold text-sm leading-tight line-clamp-2">${esc(c.name)}</div>
+        <div class="text-[11px] text-white/45 mt-1">${c.cnt} services</div>
+      </button>`).join('') : empty('🛍️', 'No categories yet')}
+    </div>
+  </div>`;
+}
+let _deb; function debSearch() { clearTimeout(_deb); _deb = setTimeout(runSearch, 320); }
+async function runSearch() {
+  const q = $('#q').value.trim(); const out = $('#svcOut');
+  if (!q) { vServices(); return; }
+  out.className = 'space-y-3'; out.innerHTML = skel(4);
+  try { const j = await api('/api/services?q=' + encodeURIComponent(q)); out.innerHTML = j.services.length ? j.services.map(svcCard).join('') : empty('🔍', 'No results', 'Try another keyword.'); }
+  catch (e) { out.innerHTML = empty('🛠️', esc(e.message)); }
+}
+function svcCard(s) {
+  return `<button onclick="go('svc',{id:${s.id}})" class="glass rounded-2xl p-4 text-left w-full card-hover block animate-rise">
+    <div class="flex gap-3 items-start"><div class="flex-1 min-w-0">
+      <div class="text-[11px] font-mono text-white/35 mb-0.5">#${s.id}</div>
+      <div class="font-bold text-sm leading-snug line-clamp-2">${esc(s.name)}</div>
+      <div class="flex flex-wrap gap-1.5 mt-2.5">
+        <span class="text-[10px] font-bold px-2 py-1 rounded-lg bg-white/8 text-white/60" style="background:rgba(255,255,255,.07)">${num(s.min)} – ${num(s.max)}</span>
+        <span class="text-[10px] font-bold px-2 py-1 rounded-lg ${s.refill ? 'bg-emerald-400/15 text-emerald-300' : 'text-white/40'}" ${s.refill ? '' : 'style="background:rgba(255,255,255,.05)"'}>${s.refill ? '♻️ Refill' : 'No refill'}</span>
+      </div></div>
+      <div class="text-right shrink-0">
+        ${s.orig_rate ? `<div class="text-[10px] line-through text-white/35 font-mono">${money(s.orig_rate)}</div>` : ''}
+        <div class="font-mono font-extrabold text-[15px] grad-text">${money(s.rate)}</div>
+        <div class="text-[10px] text-white/40">per 1000</div>
+      </div></div></button>`;
+}
+async function vCatServices() {
+  setTop(S.params.name || 'Category', 'Choose a service', true);
+  view().innerHTML = skel(5);
+  try {
+    const j = await api('/api/services?category_id=' + S.params.id);
+    view().innerHTML = `<div class="space-y-3 stagger">${maintenanceBanner()}${j.services.length ? j.services.map(svcCard).join('') : empty('📭', 'No services here', 'This category is empty right now.')}</div>`;
+  } catch (e) { view().innerHTML = empty('🛠️', esc(e.message)); }
+}
+
+/* ===================== SERVICE / ORDER ===================== */
+async function vService() {
+  setTop('New Order', 'Fill in the details', true);
+  view().innerHTML = skel(3, 'h-40');
+  let s;
+  try { s = (await api('/api/service/' + S.params.id)).service; } catch (e) { view().innerHTML = empty('🛠️', esc(e.message)); return; }
+  window._svc = s;
+  view().innerHTML = `
+  <div class="space-y-4 stagger">
+    <div class="glass rounded-3xl p-5">
+      <div class="text-[11px] font-mono text-white/35">SERVICE #${s.id}</div>
+      <div class="font-extrabold text-lg leading-snug mt-1">${esc(s.name)}</div>
+      <div class="grid grid-cols-3 gap-2 mt-4">
+        <div class="rounded-2xl p-3 text-center" style="background:rgba(255,255,255,.05)"><div class="text-[10px] text-white/45 font-bold">PRICE/1K</div>
+          ${s.orig_rate ? `<div class="text-[10px] line-through text-white/35 font-mono">${money(s.orig_rate)}</div>` : ''}<div class="font-mono font-extrabold text-sm grad-text">${money(s.rate)}</div></div>
+        <div class="rounded-2xl p-3 text-center" style="background:rgba(255,255,255,.05)"><div class="text-[10px] text-white/45 font-bold">MIN</div><div class="font-mono font-extrabold text-sm">${num(s.min)}</div></div>
+        <div class="rounded-2xl p-3 text-center" style="background:rgba(255,255,255,.05)"><div class="text-[10px] text-white/45 font-bold">MAX</div><div class="font-mono font-extrabold text-sm">${num(s.max)}</div></div>
+      </div>
+      <div class="flex gap-2 mt-3 flex-wrap">
+        <span class="text-[11px] font-bold px-3 py-1.5 rounded-full ${s.refill ? 'bg-emerald-400/15 text-emerald-300' : 'bg-white/8 text-white/50'}">♻️ ${esc(s.refill_text)}</span>
+        <span class="text-[11px] font-bold px-3 py-1.5 rounded-full ${s.cancel ? 'bg-sky-400/15 text-sky-300' : 'bg-white/8 text-white/50'}">${s.cancel ? '✅ Cancel supported' : '🚫 No cancel'}</span>
+      </div>
+      <div class="mt-4 text-[13px] text-white/60 leading-relaxed whitespace-pre-line">${esc(s.description || 'High quality, fast delivery.')}</div>
+    </div>
+    <div class="glass rounded-3xl p-5 space-y-4">
+      <div><label class="text-xs font-bold text-white/60 ml-1">🔗 Link</label>
+        <input id="oLink" type="url" inputmode="url" placeholder="https://…" class="field w-full rounded-2xl px-4 py-3.5 mt-1.5 text-sm"></div>
+      <div><label class="text-xs font-bold text-white/60 ml-1">🔢 Quantity</label>
+        <input id="oQty" type="number" inputmode="numeric" oninput="calcCost()" placeholder="${s.min} – ${s.max}" class="field w-full rounded-2xl px-4 py-3.5 mt-1.5 text-sm font-mono"></div>
+      <div class="rounded-2xl p-4 flex items-center justify-between" style="background:linear-gradient(135deg,rgba(124,58,237,.22),rgba(192,38,211,.16));border:1px solid rgba(167,139,250,.25)">
+        <div><div class="text-[11px] text-white/55 font-bold">TOTAL</div><div id="oTotal" class="font-mono font-extrabold text-2xl">${money(0)}</div></div>
+        <div class="text-right"><div class="text-[11px] text-white/55 font-bold">YOUR BALANCE</div><div class="font-mono font-bold text-sm">${money(S.me.balance)}</div></div>
+      </div>
+      <button id="oBtn" onclick="placeOrder(this)" class="grad-btn w-full rounded-2xl py-4 font-extrabold text-[15px] active:scale-[.98] transition">Place Order 🚀</button>
+    </div>
+  </div>`;
+}
+function calcCost() {
+  const q = parseInt($('#oQty').value || 0), s = window._svc;
+  $('#oTotal').textContent = money(q > 0 ? (q / 1000) * parseFloat(s.rate) : 0);
+}
+async function placeOrder(el) {
+  const s = window._svc, link = $('#oLink').value.trim(), qty = parseInt($('#oQty').value || 0);
+  if (!/^(https?|tg):\/\//i.test(link)) return toast('Enter a valid link starting with http:// or https://', 'err');
+  if (!qty || qty < s.min || qty > s.max) return toast(`Quantity must be between ${num(s.min)} and ${num(s.max)}`, 'err');
+  const cost = (qty / 1000) * parseFloat(s.rate);
+  sheet(`<div class="text-center">
+    <div class="big-ico mx-auto mb-2">📦</div><div class="font-extrabold text-xl mb-4">Confirm order</div>
+    <div class="rounded-2xl p-4 text-left space-y-2 text-sm mb-4" style="background:rgba(255,255,255,.05)">
+      <div class="flex justify-between gap-3"><span class="text-white/50">Service</span><b class="text-right">${esc(s.name)}</b></div>
+      <div class="flex justify-between gap-3"><span class="text-white/50">Link</span><b class="text-right break-all font-mono text-xs">${esc(link)}</b></div>
+      <div class="flex justify-between"><span class="text-white/50">Quantity</span><b class="font-mono">${num(qty)}</b></div>
+      <div class="flex justify-between"><span class="text-white/50">Total</span><b class="font-mono grad-text text-base">${money(cost)}</b></div>
+    </div>
+    <div class="grid grid-cols-2 gap-3">${btn('Cancel', 'closeSheet()', 'btn-soft')}
+      <button onclick="confirmOrder(this)" class="grad-btn rounded-2xl py-3.5 font-bold">Confirm ✓</button></div></div>`);
+  window._pending = { service_id: s.id, link, quantity: qty };
+}
+async function confirmOrder(el) {
+  await withBtn(el, async () => {
+    try {
+      const j = await api('/api/order', { body: window._pending });
+      closeSheet(); await refreshMe(); notifyH('success');
+      sheet(`<div class="text-center py-2"><div class="big-ico mx-auto animate-pop mb-2">🎉</div><div class="font-extrabold text-xl">Order placed!</div>
+        <div class="text-white/60 text-sm mt-1">Order <b class="font-mono">#${j.order_id}</b> · ${j.status}<br>${j.note ? esc(j.note) : ''}</div>
+        <div class="grid grid-cols-2 gap-3 mt-5">${btn('Track order', `closeSheet();go('track',{id:${j.order_id}})`)}${btn('New order', "closeSheet();go('services')", 'btn-soft')}</div></div>`);
+    } catch (e) {
+      closeSheet();
+      if (e.code === 'balance' || /balance/i.test(e.message)) sheet(`<div class="text-center"><div class="big-ico mx-auto mb-2">👛</div><div class="font-extrabold text-xl">Insufficient balance</div><div class="text-white/60 text-sm mt-1">Add funds to continue with this order.</div><div class="mt-5">${btn('Add funds', "closeSheet();go('funds')")}</div></div>`);
+      else toast(e.message, 'err');
+    }
+  });
+}
+
+/* ===================== ORDERS ===================== */
+function orderRow(o) {
+  return `<button onclick="go('track',{id:${o.id}})" class="glass rounded-2xl p-4 text-left w-full card-hover block animate-rise">
+    <div class="flex items-start justify-between gap-3"><div class="min-w-0"><div class="text-[11px] font-mono text-white/35">#${o.id} · ${esc(o.created_at)}</div>
+      <div class="font-bold text-sm mt-0.5 truncate">${esc(o.service_name)}</div>
+      <div class="text-[11px] text-white/40 truncate font-mono mt-0.5">${esc(o.link)}</div></div>${badge(o.status)}</div>
+    <div class="flex justify-between mt-3 text-xs"><span class="text-white/50">Qty <b class="font-mono text-white/80">${num(o.quantity)}</b></span><b class="font-mono grad-text">${money(o.charge)}</b></div></button>`;
+}
+async function vOrders() {
+  setTop('My Orders', 'Track everything', false);
+  const f = S.params.filter || 'all';
+  const filters = [['all', 'All'], ['active', 'Active'], ['completed', 'Done'], ['partial', 'Partial'], ['cancelled', 'Cancelled']];
+  view().innerHTML = `
+    <div class="flex gap-2 overflow-x-auto pb-3 -mx-1 px-1">${filters.map(x => `<button onclick="S.params={filter:'${x[0]}'};vOrders()" class="shrink-0 px-4 py-2 rounded-full text-xs font-bold border border-white/10 ${f === x[0] ? 'chip-on' : 'btn-soft text-white/70'}">${x[1]}</button>`).join('')}</div>
+    <div id="olist">${skel(4)}</div>`;
+  loadOrders(f, 1);
+}
+async function loadOrders(f, page) {
+  const box = $('#olist');
+  try {
+    const j = await api(`/api/orders?status=${f}&page=${page}`);
+    if (page === 1 && !j.orders.length) { box.innerHTML = empty('📦', 'No orders yet', 'Your orders will appear here.'); return; }
+    if (page === 1) box.innerHTML = '<div id="orows" class="space-y-3 stagger"></div><div id="omore" class="mt-4"></div>';
+    $('#orows').insertAdjacentHTML('beforeend', j.orders.map(orderRow).join(''));
+    $('#omore').innerHTML = page < j.pages ? btn('Load more', `loadOrders('${f}',${page + 1})`, 'btn-soft') : '';
+  } catch (e) { box.innerHTML = empty('🛠️', esc(e.message)); }
+}
+async function vTrack() {
+  setTop('Order #' + S.params.id, 'Live tracking', true);
+  view().innerHTML = skel(3, 'h-32');
+  try { const j = await api('/api/order/' + S.params.id); drawTrack(j.order); } catch (e) { view().innerHTML = empty('🛠️', esc(e.message)); }
+}
+function drawTrack(o) {
+  const pct = o.quantity ? Math.min(100, Math.round(o.delivered / o.quantity * 100)) : 0;
+  view().innerHTML = `<div class="space-y-4 stagger">
+    <div class="glass rounded-3xl p-5">
+      <div class="flex justify-between items-start gap-3"><div><div class="text-[11px] font-mono text-white/35">ORDER #${o.id}</div><div class="font-extrabold text-lg leading-snug">${esc(o.service_name)}</div></div>${badge(o.status)}</div>
+      <div class="mt-4"><div class="flex justify-between text-xs mb-1.5"><span class="text-white/55 font-semibold">Delivery progress</span><b class="font-mono">${pct}%</b></div>
+        <div class="h-3 rounded-full overflow-hidden" style="background:rgba(255,255,255,.08)"><div class="h-full rounded-full transition-all duration-700" style="width:${pct}%;background:linear-gradient(90deg,#8b5cf6,#d946ef,#22d3ee)"></div></div></div>
+      <div class="grid grid-cols-3 gap-2 mt-4 text-center">
+        <div class="rounded-2xl p-3" style="background:rgba(255,255,255,.05)"><div class="text-[10px] text-white/45 font-bold">START</div><div class="font-mono font-bold text-sm">${num(o.start_count)}</div></div>
+        <div class="rounded-2xl p-3" style="background:rgba(255,255,255,.05)"><div class="text-[10px] text-white/45 font-bold">DELIVERED</div><div class="font-mono font-bold text-sm text-emerald-300">${num(o.delivered)}</div></div>
+        <div class="rounded-2xl p-3" style="background:rgba(255,255,255,.05)"><div class="text-[10px] text-white/45 font-bold">REMAINS</div><div class="font-mono font-bold text-sm text-amber-300">${num(o.remains)}</div></div></div>
+    </div>
+    <div class="glass rounded-3xl p-5 space-y-3 text-sm">
+      <div class="flex justify-between gap-4"><span class="text-white/50">Link</span><span class="font-mono text-xs break-all text-right">${esc(o.link)}</span></div>
+      <div class="flex justify-between"><span class="text-white/50">Quantity</span><b class="font-mono">${num(o.quantity)}</b></div>
+      <div class="flex justify-between"><span class="text-white/50">Charge</span><b class="font-mono grad-text">${money(o.charge)}</b></div>
+      ${parseFloat(o.refunded_amount) > 0 ? `<div class="flex justify-between"><span class="text-white/50">Refunded</span><b class="font-mono text-emerald-300">${money(o.refunded_amount)}</b></div>` : ''}
+      <div class="flex justify-between"><span class="text-white/50">Refill</span><b>${o.refill ? (o.refill_days ? o.refill_days + ' days' : 'Lifetime') : 'Not available'}${o.refill_status !== 'None' ? ' · ' + esc(o.refill_status) : ''}</b></div>
+      <div class="flex justify-between"><span class="text-white/50">Created</span><b class="font-mono text-xs">${esc(o.created_at)}</b></div>
+      <div class="flex justify-between"><span class="text-white/50">Updated</span><b class="font-mono text-xs">${esc(o.updated_at)}</b></div>
+    </div>
+    <div class="grid grid-cols-2 gap-3">
+      <button onclick="syncOrder(this,${o.id})" class="grad-btn rounded-2xl py-3.5 font-bold">🔄 Refresh</button>
+      ${o.refill && ['Completed', 'Partial'].includes(o.status) ? `<button onclick="refillOrder(this,${o.id})" class="btn-soft rounded-2xl py-3.5 font-bold">♻️ Refill</button>` : `<button onclick="go('support')" class="btn-soft rounded-2xl py-3.5 font-bold">💬 Support</button>`}
+    </div></div>`;
+}
+async function syncOrder(el, id) { await withBtn(el, async () => { try { const j = await api(`/api/order/${id}/sync`, { body: {} }); drawTrack(j.order); await refreshMe(); toast('Status: ' + j.order.status, 'ok'); } catch (e) { toast(e.message, 'err'); } }); }
+async function refillOrder(el, id) { await withBtn(el, async () => { try { await api(`/api/order/${id}/refill`, { body: {} }); toast('Refill requested ♻️', 'ok'); vTrack(); } catch (e) { toast(e.message, 'err'); } }); }
+
+/* ===================== FUNDS ===================== */
+function vFunds() {
+  setTop('Add Funds', 'Top up your wallet', false);
+  const p = S.boot.pay, usd = S.me.currency === 'USD', L = S.boot.limits;
+  const opt = (ico, title, sub, onclick, grad, off) => `
+  <button ${off ? 'disabled' : ''} onclick="${onclick}" class="glass rounded-3xl p-4 text-left w-full card-hover flex items-center gap-4 ${off ? 'opacity-40' : ''}">
+    <div class="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl shrink-0" style="background:${grad}">${ico}</div>
+    <div class="flex-1"><div class="font-extrabold">${title}</div><div class="text-xs text-white/55 mt-0.5">${sub}</div></div><span class="text-white/30 text-xl">›</span></button>`;
+  view().innerHTML = `<div class="space-y-3 stagger">
+    ${maintenanceBanner()}
+    <div class="glass rounded-3xl p-5 flex items-center justify-between"><div><div class="text-[11px] text-white/50 font-bold tracking-widest">CURRENT BALANCE</div><div class="font-mono font-extrabold text-3xl mt-1">${money(S.me.balance)}</div></div><div class="text-4xl">👛</div></div>
+    ${usd ? `<div class="rounded-2xl p-3.5 text-sm text-amber-200" style="background:rgba(251,191,36,.12);border:1px solid rgba(251,191,36,.3)">USD accounts support crypto payments only.</div>` : ''}
+    ${opt('⚡', 'UPI · Instant', `Auto-verified · ₹${L.min} – ₹${L.max}`, "go('dep_auto')", 'linear-gradient(135deg,#059669,#10b981)', !p.upi_auto || usd)}
+    ${opt('🏦', 'UPI · Manual', 'Pay & submit UTR · admin approval', "go('dep_manual')", 'linear-gradient(135deg,#2563eb,#38bdf8)', !p.upi_manual || usd)}
+    ${opt('🪙', 'Crypto · USDT BEP-20', `${L.usdt_min} – ${L.usdt_max} USDT · admin approval`, "go('dep_usdt')", 'linear-gradient(135deg,#d97706,#facc15)', !p.usdt)}
+    ${opt('🎁', 'Redeem gift card', 'Have a code? Add instantly', "go('gift')", 'linear-gradient(135deg,#c026d3,#ec4899)', false)}
+    ${btn('🧾 Deposit & wallet history', "go('history')", 'btn-soft')}
+  </div>`;
+}
+const quickAmts = [100, 250, 500, 1000, 2000, 5000];
+function amountPicker(id) { return `<div class="grid grid-cols-3 gap-2 mt-3">${quickAmts.map(a => `<button onclick="document.getElementById('${id}').value=${a};haptic()" class="btn-soft rounded-xl py-2.5 text-sm font-bold font-mono">₹${num(a)}</button>`).join('')}</div>`; }
+
+function vDepAuto() {
+  setTop('UPI · Instant', 'Auto verified', true);
+  const L = S.boot.limits;
+  view().innerHTML = `<div class="glass rounded-3xl p-5 animate-rise">
+    <div class="big-ico mx-auto mb-2">⚡</div><div class="font-extrabold text-xl">Enter amount</div><div class="text-xs text-white/50 mt-1">Min ₹${L.min} · Max ₹${L.max}</div>
+    <div class="relative mt-4"><span class="absolute left-4 top-1/2 -translate-y-1/2 font-mono font-bold text-white/50 text-lg">₹</span>
+      <input id="dAmt" type="number" inputmode="numeric" step="1" min="1" placeholder="0" class="field w-full rounded-2xl pl-10 pr-4 py-4 text-2xl font-mono font-bold"></div>
+    ${amountPicker('dAmt')}
+    <div class="mt-5">${btn('Generate QR', 'startAuto(this)', 'grad-btn')}</div></div>`;
+}
+let _autoTimer = null;
+async function startAuto(el) {
+  const amount = $('#dAmt').value;
+  await withBtn(el, async () => {
+    try { const j = await api('/api/deposit/upi_auto', { body: { amount } }); showQr(j.deposit); }
+    catch (e) { toast(e.message, 'err'); }
+  });
+}
+function qrHtml(d) {
+  const src = d.qr || d.qr_fallback || '';
+  if (!src) return '<span class="text-black text-xs">QR unavailable — use the UPI ID</span>';
+  return `<img src="${esc(src)}" width="240" height="240" decoding="async" fetchpriority="high" alt="UPI QR" data-fb="${esc(d.qr_fallback || '')}" onerror="qrFail(this)" class="w-full h-full object-contain rounded-xl">`;
+}
+function qrFail(img) {
+  const fb = img.dataset.fb;
+  if (fb && !img.dataset.f) { img.dataset.f = 1; img.src = fb; return; }
+  img.outerHTML = '<span class="text-black text-xs">QR unavailable — use the UPI ID</span>';
+}
+function showQr(d) {
+  setTop('Scan & Pay', 'Deposit #' + d.id, true);
+  view().innerHTML = `<div class="space-y-4 animate-rise">
+    <div class="glass rounded-3xl p-5 text-center">
+      <div class="text-xs text-white/55 font-bold">SCAN, ENTER &amp; PAY</div><div class="font-mono font-extrabold text-4xl grad-text mt-1">₹${esc(d.amount)}</div>
+      <div class="bg-white rounded-3xl p-3 mx-auto mt-4 w-60 h-60 flex items-center justify-center shadow-2xl shadow-violet-500/30">${qrHtml(d)}</div>
+      <div class="text-[11px] text-white/45 mt-3 px-2">Scan with any UPI app, enter ₹${esc(d.amount)} and pay. The exact amount you pay is credited.</div>
+      <div class="mt-3 inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-mono font-bold" style="background:var(--bg);box-shadow:var(--inset-sm);color:#fcd34d">⏱ <span id="cd">--:--</span></div>
+    </div>
+    <div class="glass rounded-3xl p-5 space-y-3 text-sm">
+      <div class="flex justify-between items-center gap-3"><span class="text-white/50">Payee</span><b>${esc(d.payee)}</b></div>
+      <div class="flex justify-between items-center gap-3"><span class="text-white/50">UPI ID</span><button onclick="copyTxt('${esc(d.upi_id)}')" class="font-mono font-bold text-brand-400 break-all text-right">${esc(d.upi_id)} 📋</button></div>
+      <div class="flex justify-between items-center gap-3"><span class="text-white/50">Transaction ref</span><button onclick="copyTxt('${esc(d.reference)}')" class="font-mono font-bold text-xs text-brand-400">${esc(d.reference)} 📋</button></div>
+    </div>
+    <a href="${esc(d.upi_link)}" class="block text-center btn-soft rounded-2xl py-3.5 font-bold text-sm">📱 Open UPI app</a>
+    <div class="grid grid-cols-2 gap-3"><button id="chkBtn" onclick="checkAuto(this,${d.id})" class="grad-btn rounded-2xl py-3.5 font-bold">✅ Check payment</button>
+      <button onclick="cancelDep(${d.id})" class="btn-soft rounded-2xl py-3.5 font-bold text-rose-300">Cancel</button></div>
+    <div class="text-[11px] text-white/40 text-center">Pay using the QR above, then tap “Check payment”.</div></div>`;
+  clearInterval(_autoTimer);
+  const end = d.expires_at * 1000;
+  _autoTimer = setInterval(() => {
+    const el = $('#cd'); if (!el) return clearInterval(_autoTimer);
+    const s = Math.max(0, Math.floor((end - Date.now()) / 1000));
+    el.textContent = String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0');
+    if (!s) { clearInterval(_autoTimer); el.textContent = 'Expired'; }
+  }, 1000);
+}
+async function checkAuto(el, id) {
+  await withBtn(el, async () => {
+    try {
+      const j = await api('/api/deposit/upi_auto/check', { body: { id } });
+      if (j.state === 'approved') { clearInterval(_autoTimer); await refreshMe(); notifyH('success'); toast(j.message, 'ok'); celebrate('Payment successful!', j.message); }
+      else toast(j.message, (j.state === 'pending' || j.state === 'unpaid') ? 'info' : 'err');
+      if (['expired', 'duplicate', 'mismatch', 'failed'].includes(j.state)) { clearInterval(_autoTimer); }
+    } catch (e) { toast(e.message, 'err'); }
+  });
+}
+async function cancelDep(id) { try { await api('/api/deposit/cancel', { body: { id } }); clearInterval(_autoTimer); toast('Deposit cancelled', 'info'); go('funds'); } catch (e) { toast(e.message, 'err'); } }
+function celebrate(t, s) {
+  view().innerHTML = `<div class="text-center pt-16 animate-pop"><div class="big-ico mx-auto mb-3">🎉</div><div class="font-extrabold text-2xl grad-text">${esc(t)}</div><div class="text-white/60 text-sm mt-2 px-6">${esc(s)}</div>
+    <div class="font-mono font-extrabold text-4xl mt-5">${money(S.me.balance)}</div><div class="grid grid-cols-2 gap-3 mt-8 px-2">${btn('Browse services', "go('services')")}${btn('Home', "go('home')", 'btn-soft')}</div></div>`;
+}
+function copyTxt(t) {
+  try { navigator.clipboard.writeText(t); } catch (e) { const i = document.createElement('input'); i.value = t; document.body.appendChild(i); i.select(); document.execCommand('copy'); i.remove(); }
+  toast('Copied', 'ok'); haptic();
+}
+
+function vDepManual() {
+  setTop('UPI · Manual', 'Admin approval', true);
+  const L = S.boot.limits;
+  view().innerHTML = `<div class="glass rounded-3xl p-5 animate-rise"><div class="big-ico mx-auto mb-2">🏦</div><div class="font-extrabold text-xl">Enter amount</div><div class="text-xs text-white/50 mt-1">Min ₹${L.min} · Max ₹${L.max}</div>
+    <div class="relative mt-4"><span class="absolute left-4 top-1/2 -translate-y-1/2 font-mono font-bold text-white/50 text-lg">₹</span>
+    <input id="mAmt" type="number" inputmode="numeric" step="1" min="1" placeholder="0" class="field w-full rounded-2xl pl-10 pr-4 py-4 text-2xl font-mono font-bold"></div>${amountPicker('mAmt')}
+    <div class="mt-5">${btn('Continue', 'startManual(this)')}</div></div>`;
+}
+async function startManual(el) {
+  const amount = $('#mAmt').value;
+  await withBtn(el, async () => {
+    try {
+      const d = (await api('/api/deposit/upi_manual', { body: { amount } })).deposit;
+      setTop('Pay & Submit UTR', 'Deposit #' + d.id, true);
+      view().innerHTML = `<div class="space-y-4 animate-rise">
+        <div class="glass rounded-3xl p-5 text-center"><div class="text-xs text-white/55 font-bold">PAY EXACTLY</div><div class="font-mono font-extrabold text-4xl grad-text mt-1">₹${esc(d.amount)}</div>
+        <div class="bg-white rounded-3xl p-3 mx-auto mt-4 w-56 h-56 flex items-center justify-center shadow-2xl shadow-sky-500/30">${qrHtml(d)}</div></div>
+        <div class="glass rounded-3xl p-5 space-y-3 text-sm"><div class="flex justify-between gap-3"><span class="text-white/50">UPI ID</span><button onclick="copyTxt('${esc(d.upi_id)}')" class="font-mono font-bold text-brand-400 break-all text-right">${esc(d.upi_id)} 📋</button></div>
+        <div class="flex justify-between"><span class="text-white/50">Payee</span><b>${esc(d.payee)}</b></div></div>
+        <div class="glass rounded-3xl p-5"><label class="text-xs font-bold text-white/60 ml-1">After paying, enter your UTR / Ref No.</label>
+          <input id="mUtr" inputmode="numeric" placeholder="e.g. 412345678901" class="field w-full rounded-2xl px-4 py-3.5 mt-1.5 font-mono">
+          <div class="mt-4">${btn('Submit for approval', `submitUtr(this,${d.id})`)}</div></div>
+        <button onclick="cancelDep(${d.id})" class="w-full text-center text-rose-300 text-sm font-bold py-2">Cancel deposit</button></div>`;
+    } catch (e) { toast(e.message, 'err'); }
+  });
+}
+async function submitUtr(el, id) {
+  const utr = $('#mUtr').value.trim();
+  await withBtn(el, async () => { try { await api('/api/deposit/upi_manual/utr', { body: { id, utr } }); celebrate('Request submitted', 'An admin will verify and credit your wallet shortly.'); } catch (e) { toast(e.message, 'err'); } });
+}
+
+async function vDepUsdt() {
+  setTop('Crypto · USDT', 'BEP-20 network', true);
+  view().innerHTML = skel(2, 'h-40');
+  try {
+    const i = await api('/api/deposit/usdt/info');
+    view().innerHTML = `<div class="space-y-4 animate-rise">
+      <div class="glass rounded-3xl p-5"><div class="flex items-center gap-3"><div class="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl" style="background:linear-gradient(135deg,#d97706,#facc15)">🪙</div><div><div class="font-extrabold">Send USDT (BEP-20)</div><div class="text-xs text-white/50">1 USDT ≈ ₹${esc(parseFloat(i.rate).toFixed(2))}</div></div></div>
+        <div class="rounded-2xl p-3.5 mt-4 font-mono text-[12px] break-all" style="background:rgba(255,255,255,.06)">${esc(i.address)}</div>
+        <button onclick="copyTxt('${esc(i.address)}')" class="btn-soft w-full rounded-xl py-2.5 mt-2 text-sm font-bold">📋 Copy address</button>
+        <div class="text-[11px] text-amber-300 mt-3">⚠️ Only BEP-20 (BSC). Min ${esc(i.min)} · Max ${esc(i.max)} USDT.</div></div>
+      <div class="glass rounded-3xl p-5"><label class="text-xs font-bold text-white/60 ml-1">USDT amount you sent</label>
+        <input id="uAmt" type="number" inputmode="decimal" oninput="usdtPrev(${i.rate})" placeholder="0.00" class="field w-full rounded-2xl px-4 py-3.5 mt-1.5 font-mono text-lg">
+        <div class="text-xs text-white/50 mt-2">You will receive ≈ <b id="uPrev" class="font-mono grad-text">₹0.00</b></div>
+        <label class="text-xs font-bold text-white/60 ml-1 mt-4 block">Transaction hash (TXID)</label>
+        <input id="uTx" placeholder="0x…" class="field w-full rounded-2xl px-4 py-3.5 mt-1.5 font-mono text-xs">
+        <div class="mt-4">${btn('Submit for approval', 'submitUsdt(this)')}</div></div></div>`;
+  } catch (e) { view().innerHTML = empty('🛠️', esc(e.message)); }
+}
+function usdtPrev(r) { $('#uPrev').textContent = '₹' + ((parseFloat($('#uAmt').value || 0)) * r).toFixed(2); }
+async function submitUsdt(el) {
+  const amount = $('#uAmt').value, txid = $('#uTx').value.trim();
+  await withBtn(el, async () => {
+    try {
+      const d = (await api('/api/deposit/usdt', { body: { amount } })).deposit;
+      await api('/api/deposit/usdt/txid', { body: { id: d.id, txid } });
+      celebrate('USDT submitted', `Credit ₹${d.inr} after admin verification.`);
+    } catch (e) { toast(e.message, 'err'); }
+  });
+}
+
+/* ===================== HISTORY / GIFT / SUPPORT ===================== */
+async function vHistory() {
+  setTop('History', 'Deposits & wallet', true);
+  view().innerHTML = skel(5, 'h-16');
+  try {
+    const [d, t] = await Promise.all([api('/api/deposits'), api('/api/transactions')]);
+    view().innerHTML = `<div class="space-y-5">
+      <div><h3 class="font-extrabold mb-2">Deposits</h3><div class="space-y-2 stagger">${d.deposits.length ? d.deposits.map(x => `
+        <div class="glass rounded-2xl p-3.5 flex items-center justify-between gap-3"><div><div class="font-mono font-bold">₹${esc(x.amount)} <span class="text-[10px] text-white/40">${esc(x.method.replace('_', ' '))}</span></div><div class="text-[11px] text-white/40 font-mono">#${x.id} · ${esc(x.created_at)}</div></div>${badge(x.status)}</div>`).join('') : '<div class="text-sm text-white/40">No deposits yet.</div>'}</div></div>
+      <div><h3 class="font-extrabold mb-2">Wallet transactions</h3><div class="space-y-2 stagger">${t.transactions.length ? t.transactions.map(x => {
+        const pos = parseFloat(x.amount) >= 0; return `<div class="glass rounded-2xl p-3.5 flex items-center justify-between gap-3"><div class="min-w-0"><div class="font-bold text-sm truncate">${esc(x.type)}</div><div class="text-[11px] text-white/40 truncate">${esc(x.description || '')}</div><div class="text-[10px] text-white/30 font-mono">${esc(x.created_at)}</div></div><div class="font-mono font-extrabold ${pos ? 'text-emerald-300' : 'text-rose-300'}">${pos ? '+' : ''}${money(x.amount)}</div></div>`; }).join('') : '<div class="text-sm text-white/40">No transactions yet.</div>'}</div></div></div>`;
+  } catch (e) { view().innerHTML = empty('🛠️', esc(e.message)); }
+}
+function vGift() {
+  setTop('Gift Card', 'Redeem a code', true);
+  view().innerHTML = `<div class="glass rounded-3xl p-6 text-center animate-rise"><div class="big-ico mx-auto mb-2">🎁</div><div class="font-extrabold text-xl">Redeem gift card</div>
+    <input id="gCode" placeholder="ENTER CODE" class="field w-full rounded-2xl px-4 py-4 mt-5 text-center font-mono font-bold tracking-widest uppercase">
+    <div class="mt-4">${btn('Redeem 🎉', 'redeemGift(this)')}</div></div>`;
+}
+async function redeemGift(el) {
+  const code = $('#gCode').value.trim();
+  await withBtn(el, async () => { try { const j = await api('/api/gift', { body: { code } }); await refreshMe(); celebrate('Gift redeemed!', money(j.amount) + ' added to your wallet.'); } catch (e) { toast(e.message, 'err'); } });
+}
+function vSupport() {
+  setTop('Support', 'We are here to help', true);
+  const s = S.boot.support, u = String(s.username || '').replace('@', '');
+  view().innerHTML = `<div class="space-y-3 stagger"><div class="glass rounded-3xl p-6 text-center"><div class="big-ico mx-auto mb-2">💬</div><div class="font-extrabold text-xl">Need help?</div><div class="text-sm text-white/55 mt-1">Hours: 10 AM – 10 PM IST</div></div>
+    <button onclick="openLink('https://t.me/${esc(u)}')" class="glass rounded-2xl p-4 w-full text-left card-hover flex items-center gap-3"><span class="text-2xl">📞</span><div><div class="font-bold">Contact support</div><div class="text-xs text-white/50">${esc(s.username)}</div></div></button>
+    <button onclick="openLink('${esc(s.channel)}')" class="glass rounded-2xl p-4 w-full text-left card-hover flex items-center gap-3"><span class="text-2xl">📢</span><div><div class="font-bold">Updates channel</div><div class="text-xs text-white/50 break-all">${esc(s.channel)}</div></div></button></div>`;
+}
+function openLink(u) { try { /t\.me\//.test(u) ? tg.openTelegramLink(u) : tg.openLink(u); } catch (e) { window.open(u, '_blank'); } }
+
+/* ===================== PROFILE ===================== */
+async function vProfile() {
+  setTop('Profile', 'Your account', false);
+  view().innerHTML = skel(3, 'h-32');
+  try {
+    const j = await api('/api/profile'), p = j.profile, st = j.stats, r = j.referral;
+    view().innerHTML = `<div class="space-y-4 stagger">
+      <div class="glass rounded-3xl p-5 flex items-center gap-4"><div class="w-16 h-16 rounded-2xl grad-btn flex items-center justify-center text-3xl font-extrabold">${esc((p.first_name || 'U')[0].toUpperCase())}</div>
+        <div class="min-w-0"><div class="font-extrabold text-lg truncate">${esc(p.first_name)}</div><div class="text-xs text-white/50 font-mono">ID ${p.id}${p.username ? ' · @' + esc(p.username) : ''}</div><div class="text-[11px] text-white/35">Joined ${esc(p.joined)}</div></div></div>
+      <div class="grid grid-cols-2 gap-3">
+        <div class="glass rounded-2xl p-4"><div class="text-[11px] text-white/50 font-bold">BALANCE</div><div class="font-mono font-extrabold text-lg mt-1">${money(p.balance)}</div></div>
+        <div class="glass rounded-2xl p-4"><div class="text-[11px] text-white/50 font-bold">SPENT</div><div class="font-mono font-extrabold text-lg mt-1">${money(p.total_spent)}</div></div>
+        <div class="glass rounded-2xl p-4"><div class="text-[11px] text-white/50 font-bold">DEPOSITED</div><div class="font-mono font-extrabold text-lg mt-1">${money(p.total_deposited)}</div></div>
+        <div class="glass rounded-2xl p-4"><div class="text-[11px] text-white/50 font-bold">REFERRAL EARNED</div><div class="font-mono font-extrabold text-lg mt-1 text-emerald-300">${money(p.referral_earnings)}</div></div></div>
+      <div class="glass rounded-3xl p-5"><div class="font-extrabold mb-3">📊 My stats</div><div class="grid grid-cols-5 gap-2 text-center">
+        ${[['Total', st.total, ''], ['Done', st.completed, 'text-emerald-300'], ['Active', st.active, 'text-sky-300'], ['Partial', st.partial, 'text-orange-300'], ['Failed', st.cancelled, 'text-rose-300']].map(x => `<div class="rounded-xl py-2.5" style="background:rgba(255,255,255,.05)"><div class="font-mono font-extrabold ${x[2]}">${x[1]}</div><div class="text-[9px] text-white/45 font-bold">${x[0]}</div></div>`).join('')}</div></div>
+      <div class="glass rounded-3xl p-5"><div class="font-extrabold">🤝 Refer & Earn</div><div class="text-xs text-white/55 mt-1">${r.enabled ? `Earn <b>${esc(r.percent)}%</b> on every deposit your friends make.` : 'Referral program is currently disabled.'} · ${r.count} referrals</div>
+        <div class="rounded-xl p-3 mt-3 font-mono text-[11px] break-all" style="background:rgba(255,255,255,.06)">${esc(r.link)}</div>
+        <div class="grid grid-cols-2 gap-2 mt-3"><button onclick="copyTxt('${esc(r.link)}')" class="btn-soft rounded-xl py-2.5 text-sm font-bold">📋 Copy</button>
+          <button onclick="openLink('https://t.me/share/url?url=${encodeURIComponent(r.link)}&text=${encodeURIComponent('Join this amazing SMM bot!')}')" class="grad-btn rounded-xl py-2.5 text-sm font-bold">📤 Share</button></div></div>
+      <div class="glass rounded-3xl p-5 flex items-center justify-between"><div><div class="font-extrabold">💱 Currency</div><div class="text-xs text-white/50">Display prices in</div></div>
+        <div class="flex rounded-xl overflow-hidden border border-white/10">${['INR', 'USD'].map(c => `<button onclick="setCur('${c}')" class="px-4 py-2 text-sm font-bold ${p.currency === c ? 'chip-on' : 'text-white/60'}">${c}</button>`).join('')}</div></div>
+      <div class="grid grid-cols-2 gap-3">${btn('🎁 Gift card', "go('gift')", 'btn-soft')}${btn('🧾 History', "go('history')", 'btn-soft')}</div>
+    </div>`;
+  } catch (e) { view().innerHTML = empty('🛠️', esc(e.message)); }
+}
+async function setCur(c) { try { await api('/api/currency', { body: { currency: c } }); S.me.currency = c; $('#balPill').textContent = money(S.me.balance); toast('Currency: ' + c, 'ok'); vProfile(); } catch (e) { toast(e.message, 'err'); } }
+
+/* ===================== ADMIN ===================== */
+function adminGuard() { if (!S.me.is_admin) { go('home'); return false; } return true; }
+const A_TILES = [['📦', 'Orders', 'admin_orders'], ['👥', 'Users', 'admin_users'], ['💳', 'Deposits', 'admin_deposits'], ['🛍️', 'Services', 'admin_services'],
+  ['➕', 'Add service', 'admin_add_service'], ['🏷️', 'Categories', 'admin_categories'], ['🔌', 'Providers', 'admin_providers'], ['🎁', 'Gift cards', 'admin_gifts'],
+  ['📣', 'Broadcast', 'admin_broadcast'], ['⚙️', 'Settings', 'admin_settings']];
+async function vAdmin() {
+  if (!adminGuard()) return; setTop('Admin Panel', 'Control center', false);
+  view().innerHTML = skel(3, 'h-32');
+  try {
+    const d = (await api('/api/admin/dashboard')).dashboard;
+    const stat = (l, v, c = '') => `<div class="glass rounded-2xl p-3.5"><div class="text-[10px] text-white/45 font-bold tracking-wide">${l}</div><div class="font-mono font-extrabold text-lg mt-0.5 ${c}">${v}</div></div>`;
+    view().innerHTML = `<div class="space-y-4 stagger">
+      <div class="rounded-[28px] p-5 relative overflow-hidden" style="background:linear-gradient(135deg,#0f172a,#312e81 55%,#6d28d9)"><div class="absolute -right-8 -top-8 w-36 h-36 rounded-full bg-fuchsia-400/25 blur-2xl"></div>
+        <div class="text-white/60 text-[11px] font-bold tracking-widest">REVENUE</div><div class="font-mono font-extrabold text-3xl mt-1">₹${num(Math.round(d.revenue))}</div>
+        <div class="flex gap-5 mt-4 text-xs"><div><div class="text-white/50">Today orders</div><b class="font-mono">${d.today_orders}</b></div><div><div class="text-white/50">Today revenue</div><b class="font-mono">₹${num(Math.round(d.today_revenue))}</b></div><div><div class="text-white/50">New users</div><b class="font-mono">${d.today_users}</b></div></div></div>
+      ${d.pending_deposits ? `<button onclick="go('admin_deposits',{status:'PENDING'})" class="w-full rounded-2xl p-4 flex items-center gap-3 text-left" style="background:linear-gradient(135deg,rgba(251,191,36,.2),rgba(249,115,22,.15));border:1px solid rgba(251,191,36,.35)"><span class="text-2xl">⏳</span><div class="flex-1"><b>${d.pending_deposits} deposit(s) awaiting approval</b><div class="text-xs text-white/60">Tap to review</div></div><span>›</span></button>` : ''}
+      <div class="grid grid-cols-3 gap-2.5">${stat('USERS', num(d.users))}${stat('ORDERS', num(d.orders))}${stat('DEPOSITS', '₹' + num(Math.round(d.deposits)), 'text-emerald-300')}
+        ${stat('PENDING', d.pending, 'text-amber-300')}${stat('PROCESSING', d.processing, 'text-sky-300')}${stat('COMPLETED', d.completed, 'text-emerald-300')}
+        ${stat('PARTIAL', d.partial, 'text-orange-300')}${stat('CANCELLED', d.cancelled + d.failed, 'text-rose-300')}${stat('REFUNDS', '₹' + num(Math.round(d.refunds)))}
+        ${stat('WALLETS', '₹' + num(Math.round(d.wallets)))}${stat('SERVICES', d.services)}${stat('PROVIDERS', d.providers)}</div>
+      <div class="grid grid-cols-2 gap-3">${A_TILES.map(t => `<button onclick="go('${t[2]}')" class="glass rounded-2xl p-4 flex items-center gap-3 card-hover"><span class="text-2xl">${t[0]}</span><span class="font-bold text-sm">${t[1]}</span></button>`).join('')}</div></div>`;
+  } catch (e) { view().innerHTML = empty('🛠️', esc(e.message)); }
+}
+function pager(fnName, page, pages) { return pages > 1 ? `<div class="flex items-center justify-between mt-4"><button ${page <= 1 ? 'disabled' : ''} onclick="${fnName}(${page - 1})" class="btn-soft rounded-xl px-4 py-2.5 font-bold text-sm disabled:opacity-30">‹ Prev</button><span class="text-xs text-white/50 font-mono">${page} / ${pages}</span><button ${page >= pages ? 'disabled' : ''} onclick="${fnName}(${page + 1})" class="btn-soft rounded-xl px-4 py-2.5 font-bold text-sm disabled:opacity-30">Next ›</button></div>` : ''; }
+
+/* --- admin orders --- */
+function vAdminOrders() { if (!adminGuard()) return; setTop('Orders', 'All orders', true); S.ao = S.ao || { f: 'all', q: '' }; drawAO(1); }
+async function drawAO(page) {
+  const f = S.ao.f, filters = [['all', 'All'], ['active', 'Active'], ['completed', 'Done'], ['partial', 'Partial'], ['cancelled', 'Cancelled']];
+  view().innerHTML = `<div class="space-y-3"><input id="aoq" value="${esc(S.ao.q)}" placeholder="Search order ID / user ID / link…" onkeydown="if(event.key==='Enter'){S.ao.q=this.value;drawAO(1)}" class="field w-full rounded-2xl px-4 py-3 text-sm">
+    <div class="flex gap-2 overflow-x-auto pb-1">${filters.map(x => `<button onclick="S.ao.f='${x[0]}';drawAO(1)" class="shrink-0 px-4 py-2 rounded-full text-xs font-bold border border-white/10 ${f === x[0] ? 'chip-on' : 'btn-soft text-white/70'}">${x[1]}</button>`).join('')}</div>
+    <div id="aol">${skel(4)}</div></div>`;
+  try {
+    const j = await api(`/api/admin/orders?status=${f}&page=${page}&q=${encodeURIComponent(S.ao.q)}`);
+    $('#aol').innerHTML = j.orders.length ? `<div class="space-y-2.5 stagger">${j.orders.map(o => `<button onclick="go('admin_order',{id:${o.id}})" class="glass rounded-2xl p-3.5 text-left w-full card-hover block"><div class="flex justify-between gap-2"><div class="min-w-0"><div class="text-[11px] font-mono text-white/35">#${o.id} · 👤 ${o.user_id}</div><div class="font-bold text-sm truncate">${esc(o.service_name)}</div></div>${badge(o.status)}</div><div class="flex justify-between text-xs mt-2"><span class="text-white/50">Qty <b class="font-mono">${num(o.quantity)}</b></span><b class="font-mono grad-text">₹${esc(o.charge)}</b></div></button>`).join('')}</div>${pager('drawAO', page, j.pages)}` : empty('📭', 'No orders');
+  } catch (e) { $('#aol').innerHTML = empty('🛠️', esc(e.message)); }
+}
+async function vAdminOrder() {
+  if (!adminGuard()) return; setTop('Order #' + S.params.id, 'Manage', true); view().innerHTML = skel(3, 'h-32');
+  try {
+    const o = (await api('/api/admin/order/' + S.params.id)).order;
+    view().innerHTML = `<div class="space-y-4 stagger">
+      <div class="glass rounded-3xl p-5 space-y-2.5 text-sm"><div class="flex justify-between items-start gap-3"><div class="font-extrabold">${esc(o.service_name)}</div>${badge(o.status)}</div>
+        <div class="flex justify-between"><span class="text-white/50">User</span><button onclick="go('admin_user',{id:${o.user_id}})" class="font-mono font-bold text-brand-400">${o.user_id} ›</button></div>
+        <div class="flex justify-between gap-4"><span class="text-white/50">Link</span><span class="font-mono text-xs break-all text-right">${esc(o.link)}</span></div>
+        <div class="flex justify-between"><span class="text-white/50">Provider order</span><b class="font-mono">${esc(o.provider_order_id || '—')}</b></div>
+        <div class="flex justify-between"><span class="text-white/50">Quantity / Remains</span><b class="font-mono">${num(o.quantity)} / ${num(o.remains)}</b></div>
+        <div class="flex justify-between"><span class="text-white/50">Charge</span><b class="font-mono grad-text">₹${esc(o.charge)}</b></div>
+        <div class="flex justify-between"><span class="text-white/50">Refund</span><b class="font-mono">${esc(o.refund_state)} · ₹${esc(o.refunded_amount)}</b></div>
+        <div class="flex justify-between"><span class="text-white/50">Refill</span><b>${esc(o.refill_status)}</b></div></div>
+      <div class="glass rounded-3xl p-5"><div class="font-bold mb-3 text-sm">Set status</div><div class="grid grid-cols-3 gap-2">${['Pending', 'Processing', 'In Progress', 'Completed', 'Partial'].map(s => `<button onclick="aoStatus(${o.id},'${s}')" class="btn-soft rounded-xl py-2.5 text-xs font-bold">${s}</button>`).join('')}</div></div>
+      <div class="grid grid-cols-2 gap-3"><button onclick="aoAct(this,${o.id},'sync')" class="grad-btn rounded-2xl py-3.5 font-bold">🔄 Sync</button><button onclick="aoAct(this,${o.id},'refill')" class="btn-soft rounded-2xl py-3.5 font-bold">♻️ Refill</button>
+        <button onclick="aoAct(this,${o.id},'refill_cancel')" class="btn-soft rounded-2xl py-3.5 font-bold text-xs">Cancel refill</button><button onclick="aoCancel(${o.id},'${o.charge}','${o.refunded_amount}')" class="rounded-2xl py-3.5 font-bold text-rose-300" style="background:rgba(244,63,94,.14);border:1px solid rgba(244,63,94,.3)">🚫 Cancel</button></div></div>`;
+  } catch (e) { view().innerHTML = empty('🛠️', esc(e.message)); }
+}
+async function aoStatus(id, status) { try { await api(`/api/admin/order/${id}/status`, { body: { status } }); toast('Status updated', 'ok'); vAdminOrder(); } catch (e) { toast(e.message, 'err'); } }
+async function aoAct(el, id, a) { await withBtn(el, async () => { try { await api(`/api/admin/order/${id}/${a}`, { body: {} }); toast('Done', 'ok'); vAdminOrder(); } catch (e) { toast(e.message, 'err'); } }); }
+function aoCancel(id, charge, refunded) {
+  sheet(`<div class="font-extrabold text-xl mb-1">Cancel order #${id}</div><div class="text-xs text-white/50 mb-4">Refundable: ₹${(parseFloat(charge) - parseFloat(refunded)).toFixed(2)}</div>
+  <div class="space-y-2.5"><button onclick="aoDoCancel(${id},'full')" class="grad-btn w-full rounded-2xl py-3.5 font-bold">Cancel + full refund</button>
+  <button onclick="aoDoCancel(${id},'none')" class="btn-soft w-full rounded-2xl py-3.5 font-bold">Cancel without refund</button>
+  <div class="flex gap-2"><input id="prAmt" type="number" inputmode="decimal" placeholder="Partial refund ₹" class="field flex-1 rounded-2xl px-4 py-3 text-sm font-mono"><button onclick="aoDoCancel(${id},'partial')" class="btn-soft rounded-2xl px-5 font-bold">Refund</button></div></div>`);
+}
+async function aoDoCancel(id, mode) { try { await api(`/api/admin/order/${id}/cancel`, { body: { mode, amount: mode === 'partial' ? $('#prAmt').value : '' } }); closeSheet(); toast('Done', 'ok'); vAdminOrder(); } catch (e) { toast(e.message, 'err'); } }
+
+/* --- admin users --- */
+function vAdminUsers() { if (!adminGuard()) return; setTop('Users', 'Search & manage', true); S.auq = S.auq || ''; drawAU(1); }
+async function drawAU(page) {
+  view().innerHTML = `<div class="space-y-3"><input value="${esc(S.auq)}" placeholder="User ID / @username / name" onkeydown="if(event.key==='Enter'){S.auq=this.value;drawAU(1)}" class="field w-full rounded-2xl px-4 py-3 text-sm"><div id="aul">${skel(4)}</div></div>`;
+  try {
+    const j = await api(`/api/admin/users?page=${page}&q=${encodeURIComponent(S.auq)}`);
+    $('#aul').innerHTML = j.users.length ? `<div class="text-xs text-white/40 mb-2">${j.total} users</div><div class="space-y-2.5 stagger">${j.users.map(u => `<button onclick="go('admin_user',{id:${u.id}})" class="glass rounded-2xl p-3.5 text-left w-full card-hover flex items-center gap-3"><div class="w-11 h-11 rounded-xl grad-btn flex items-center justify-center font-extrabold">${esc((u.first_name || 'U')[0].toUpperCase())}</div><div class="flex-1 min-w-0"><div class="font-bold text-sm truncate">${esc(u.first_name)} ${u.banned ? '🚫' : ''}</div><div class="text-[11px] text-white/40 font-mono">${u.id}${u.username ? ' · @' + esc(u.username) : ''}</div></div><b class="font-mono text-sm">₹${esc(u.balance)}</b></button>`).join('')}</div>${pager('drawAU', page, j.pages)}` : empty('🔍', 'No users found');
+  } catch (e) { $('#aul').innerHTML = empty('🛠️', esc(e.message)); }
+}
+async function vAdminUser() {
+  if (!adminGuard()) return; setTop('User ' + S.params.id, 'Profile', true); view().innerHTML = skel(3, 'h-32');
+  try {
+    const j = await api('/api/admin/user/' + S.params.id), u = j.user;
+    view().innerHTML = `<div class="space-y-4 stagger">
+      <div class="glass rounded-3xl p-5"><div class="flex items-center gap-4"><div class="w-14 h-14 rounded-2xl grad-btn flex items-center justify-center text-2xl font-extrabold">${esc((u.first_name || 'U')[0].toUpperCase())}</div><div><div class="font-extrabold text-lg">${esc(u.first_name)} ${u.banned ? '🚫' : ''}</div><div class="text-xs text-white/50 font-mono">${u.id}${u.username ? ' · @' + esc(u.username) : ''}</div></div></div>
+        <div class="grid grid-cols-2 gap-2 mt-4 text-center">${[['Balance', '₹' + u.balance], ['Spent', '₹' + u.total_spent], ['Deposited', '₹' + u.total_deposited], ['Orders', u.orders], ['Referrals', u.referrals], ['Ref. earned', '₹' + u.referral_earnings]].map(x => `<div class="rounded-xl p-2.5" style="background:rgba(255,255,255,.05)"><div class="text-[10px] text-white/45 font-bold">${x[0]}</div><div class="font-mono font-bold text-sm">${esc(x[1])}</div></div>`).join('')}</div></div>
+      <div class="grid grid-cols-3 gap-2.5"><button onclick="auBal(${u.id})" class="grad-btn rounded-2xl py-3 font-bold text-xs">💰 Balance</button><button onclick="auMsg(${u.id})" class="btn-soft rounded-2xl py-3 font-bold text-xs">✉️ Message</button>
+        <button onclick="auBan(${u.id})" class="rounded-2xl py-3 font-bold text-xs ${u.banned ? 'btn-soft' : 'text-rose-300'}" ${u.banned ? '' : 'style="background:rgba(244,63,94,.14);border:1px solid rgba(244,63,94,.3)"'}>${u.banned ? '✅ Unban' : '🚫 Ban'}</button></div>
+      <div><div class="font-extrabold mb-2 text-sm">Recent orders</div><div class="space-y-2">${j.recent_orders.length ? j.recent_orders.map(o => `<button onclick="go('admin_order',{id:${o.id}})" class="glass rounded-xl p-3 w-full text-left flex justify-between items-center gap-2"><div class="min-w-0"><div class="text-[11px] font-mono text-white/35">#${o.id}</div><div class="text-sm font-bold truncate">${esc(o.service_name)}</div></div>${badge(o.status)}</button>`).join('') : '<div class="text-sm text-white/40">None</div>'}</div></div>
+      <div><div class="font-extrabold mb-2 text-sm">Recent transactions</div><div class="space-y-2">${j.recent_tx.map(t => `<div class="glass rounded-xl p-3 flex justify-between gap-2 text-sm"><div class="min-w-0"><div class="font-bold truncate">${esc(t.type)}</div><div class="text-[10px] text-white/35">${esc(t.created_at)}</div></div><b class="font-mono ${parseFloat(t.amount) >= 0 ? 'text-emerald-300' : 'text-rose-300'}">₹${esc(t.amount)}</b></div>`).join('') || '<div class="text-sm text-white/40">None</div>'}</div></div></div>`;
+  } catch (e) { view().innerHTML = empty('🛠️', esc(e.message)); }
+}
+function auBal(id) {
+  sheet(`<div class="font-extrabold text-xl mb-4">Adjust balance</div><div class="space-y-3">
+    <div class="grid grid-cols-2 gap-2"><button id="bAdd" onclick="window._ba='add';this.classList.add('chip-on');$('#bDed').classList.remove('chip-on')" class="btn-soft chip-on rounded-xl py-2.5 font-bold">➕ Add</button><button id="bDed" onclick="window._ba='deduct';this.classList.add('chip-on');$('#bAdd').classList.remove('chip-on')" class="btn-soft rounded-xl py-2.5 font-bold">➖ Deduct</button></div>
+    <input id="bAmt" type="number" inputmode="decimal" placeholder="Amount ₹" class="field w-full rounded-2xl px-4 py-3.5 font-mono"><input id="bWhy" placeholder="Reason" class="field w-full rounded-2xl px-4 py-3.5 text-sm">
+    <button onclick="auBalGo(this,${id})" class="grad-btn w-full rounded-2xl py-3.5 font-bold">Apply</button></div>`); window._ba = 'add';
+}
+async function auBalGo(el, id) { await withBtn(el, async () => { try { await api(`/api/admin/user/${id}/balance`, { body: { action: window._ba, amount: $('#bAmt').value, reason: $('#bWhy').value } }); closeSheet(); toast('Balance updated', 'ok'); vAdminUser(); } catch (e) { toast(e.message, 'err'); } }); }
+function auMsg(id) { sheet(`<div class="font-extrabold text-xl mb-4">Message user</div><textarea id="mTxt" rows="4" placeholder="Write a message…" class="field w-full rounded-2xl px-4 py-3 text-sm"></textarea><div class="mt-3"><button onclick="auMsgGo(this,${id})" class="grad-btn w-full rounded-2xl py-3.5 font-bold">Send ✉️</button></div>`); }
+async function auMsgGo(el, id) { await withBtn(el, async () => { try { await api(`/api/admin/user/${id}/message`, { body: { text: $('#mTxt').value } }); closeSheet(); toast('Sent', 'ok'); } catch (e) { toast(e.message, 'err'); } }); }
+async function auBan(id) { try { const j = await api(`/api/admin/user/${id}/ban`, { body: {} }); toast(j.banned ? 'User banned' : 'User unbanned', 'ok'); vAdminUser(); } catch (e) { toast(e.message, 'err'); } }
+
+/* --- admin deposits --- */
+function vAdminDeposits() { if (!adminGuard()) return; setTop('Deposits', 'Approve & review', true); S.adf = S.params.status || S.adf || ''; drawAD(1); }
+async function drawAD(page) {
+  const f = S.adf, fl = [['', 'All'], ['PENDING', 'Pending'], ['APPROVED', 'Approved'], ['REJECTED', 'Rejected'], ['EXPIRED', 'Expired']];
+  view().innerHTML = `<div class="space-y-3"><div class="flex gap-2 overflow-x-auto pb-1">${fl.map(x => `<button onclick="S.adf='${x[0]}';drawAD(1)" class="shrink-0 px-4 py-2 rounded-full text-xs font-bold border border-white/10 ${f === x[0] ? 'chip-on' : 'btn-soft text-white/70'}">${x[1]}</button>`).join('')}</div><div id="adl">${skel(4)}</div></div>`;
+  try {
+    const j = await api(`/api/admin/deposits?page=${page}&status=${f}`);
+    $('#adl').innerHTML = j.deposits.length ? `<div class="space-y-2.5 stagger">${j.deposits.map(d => `<div class="glass rounded-2xl p-3.5"><div class="flex justify-between items-start gap-2"><div><div class="font-mono font-extrabold">₹${esc(d.amount)} ${d.crypto_amount ? `<span class="text-[10px] text-white/40">(${esc(d.crypto_amount)} USDT)</span>` : ''}</div><div class="text-[11px] text-white/40 font-mono">#${d.id} · 👤 ${d.user_id} · ${esc(d.method)}</div>${d.utr ? `<div class="text-[11px] font-mono text-white/60 break-all mt-0.5">UTR: ${esc(d.utr)}</div>` : ''}<div class="text-[10px] text-white/30">${esc(d.created_at)}</div></div>${badge(d.status)}</div>
+      ${d.status === 'PENDING' && d.method !== 'UPI_AUTO' ? `<div class="grid grid-cols-2 gap-2 mt-3"><button onclick="depAct(${d.id},'approve')" class="grad-btn rounded-xl py-2.5 text-sm font-bold">✅ Approve</button><button onclick="depAct(${d.id},'reject')" class="rounded-xl py-2.5 text-sm font-bold text-rose-300" style="background:rgba(244,63,94,.14);border:1px solid rgba(244,63,94,.3)">❌ Reject</button></div>` : ''}</div>`).join('')}</div>${pager('drawAD', page, j.pages)}` : empty('💳', 'No deposits');
+  } catch (e) { $('#adl').innerHTML = empty('🛠️', esc(e.message)); }
+}
+async function depAct(id, a) { try { await api(`/api/admin/deposit/${id}/${a}`, { body: {} }); toast(a === 'approve' ? 'Deposit approved' : 'Deposit rejected', 'ok'); drawAD(1); } catch (e) { toast(e.message, 'err'); } }
+
+/* --- admin services --- */
+function vAdminServices() { if (!adminGuard()) return; setTop('Services', 'Prices & status', true); S.asq = S.asq || ''; drawAS(1); }
+async function drawAS(page) {
+  view().innerHTML = `<div class="space-y-3"><input value="${esc(S.asq)}" placeholder="Search service ID / name" onkeydown="if(event.key==='Enter'){S.asq=this.value;drawAS(1)}" class="field w-full rounded-2xl px-4 py-3 text-sm"><div id="asl">${skel(4)}</div>
+    <div class="grid grid-cols-2 gap-3">${btn('➕ Add service', "go('admin_add_service')")}${btn('🏷️ Categories', "go('admin_categories')", 'btn-soft')}</div>${btn('♻️ Recalculate prices', 'recalc(this)', 'btn-soft')}</div>`;
+  try {
+    const j = await api(`/api/admin/services?page=${page}&q=${encodeURIComponent(S.asq)}`);
+    $('#asl').innerHTML = j.services.length ? `<div class="space-y-2.5 stagger">${j.services.map(s => `<div class="glass rounded-2xl p-3.5"><div class="flex justify-between gap-2"><div class="min-w-0"><div class="text-[11px] font-mono text-white/35">#${s.id} · ${esc(s.category)}</div><div class="font-bold text-sm line-clamp-2">${esc(s.name)}</div></div><button onclick="svcToggle(${s.id})" class="toggle ${s.active ? 'on' : ''}"></button></div>
+      <div class="flex justify-between items-center mt-2.5"><div class="text-xs text-white/50">Cost <b class="font-mono">₹${esc(s.provider_rate)}</b> · Sell <b class="font-mono grad-text">₹${esc(s.rate)}</b></div><div class="flex gap-2"><button onclick="svcPrice(${s.id},'${esc(s.rate)}')" class="btn-soft rounded-lg px-3 py-1.5 text-xs font-bold">✏️ Price</button><button onclick="svcDelete(${s.id})" class="rounded-lg px-3 py-1.5 text-xs font-bold text-rose-300" style="background:rgba(244,63,94,.14);border:1px solid rgba(244,63,94,.3)">🗑</button></div></div></div>`).join('')}</div>${pager('drawAS', page, j.pages)}` : empty('🛍️', 'No services');
+  } catch (e) { $('#asl').innerHTML = empty('🛠️', esc(e.message)); }
+}
+async function svcToggle(id) { try { await api(`/api/admin/service/${id}/toggle`, { body: {} }); drawAS(1); } catch (e) { toast(e.message, 'err'); } }
+function svcPrice(id, cur) { sheet(`<div class="font-extrabold text-xl mb-4">Set price / 1000</div><input id="spv" type="number" inputmode="decimal" value="${esc(cur)}" class="field w-full rounded-2xl px-4 py-3.5 font-mono text-lg"><div class="mt-3"><button onclick="svcPriceGo(this,${id})" class="grad-btn w-full rounded-2xl py-3.5 font-bold">Save</button></div>`); }
+async function svcPriceGo(el, id) { await withBtn(el, async () => { try { await api(`/api/admin/service/${id}/price`, { body: { rate: $('#spv').value } }); closeSheet(); toast('Price updated', 'ok'); drawAS(1); } catch (e) { toast(e.message, 'err'); } }); }
+async function recalc(el) { await withBtn(el, async () => { try { const j = await api('/api/admin/recalc', { body: {} }); toast(`Updated ${j.updated}, skipped ${j.skipped}`, 'ok'); } catch (e) { toast(e.message, 'err'); } }); }
+
+/* --- admin gifts --- */
+async function vAdminGifts() {
+  if (!adminGuard()) return; setTop('Gift Cards', 'Create & manage', true); view().innerHTML = skel(3);
+  try {
+    const j = await api('/api/admin/gifts');
+    view().innerHTML = `<div class="space-y-3"><div class="glass rounded-3xl p-4 space-y-2.5"><div class="font-extrabold text-sm">Create gift card</div>
+      <div class="grid grid-cols-3 gap-2"><input id="gcCode" placeholder="CODE" class="field rounded-xl px-3 py-3 text-xs font-mono uppercase col-span-3"><input id="gcAmt" type="number" placeholder="₹ amount" class="field rounded-xl px-3 py-3 text-sm font-mono col-span-2"><input id="gcUses" type="number" placeholder="Uses" value="1" class="field rounded-xl px-3 py-3 text-sm font-mono"></div>${btn('Create 🎁', 'gcCreate(this)')}</div>
+      <div class="space-y-2 stagger">${j.gifts.map(g => `<div class="glass rounded-2xl p-3.5 flex items-center justify-between gap-2"><div><div class="font-mono font-bold">${esc(g.code)}</div><div class="text-[11px] text-white/45">₹${esc(g.amount)} · ${g.used}/${g.max_uses} used</div></div><div class="flex items-center gap-3"><button onclick="gcToggle('${esc(g.code)}')" class="toggle ${g.active ? 'on' : ''}"></button><button onclick="gcDel('${esc(g.code)}')" class="text-rose-300 text-lg">🗑</button></div></div>`).join('') || empty('🎁', 'No gift cards')}</div></div>`;
+  } catch (e) { view().innerHTML = empty('🛠️', esc(e.message)); }
+}
+async function gcCreate(el) { await withBtn(el, async () => { try { await api('/api/admin/gift', { body: { code: $('#gcCode').value, amount: $('#gcAmt').value, uses: $('#gcUses').value } }); toast('Created', 'ok'); vAdminGifts(); } catch (e) { toast(e.message, 'err'); } }); }
+async function gcToggle(c) { try { await api(`/api/admin/gift/${encodeURIComponent(c)}/toggle`, { body: {} }); vAdminGifts(); } catch (e) { toast(e.message, 'err'); } }
+async function gcDel(c) { if (!confirm('Delete this gift card?')) return; try { await api(`/api/admin/gift/${encodeURIComponent(c)}/delete`, { body: {} }); vAdminGifts(); } catch (e) { toast(e.message, 'err'); } }
+
+/* --- admin providers --- */
+async function vAdminProviders() {
+  if (!adminGuard()) return; setTop('Providers', 'API connections', true); view().innerHTML = skel(3);
+  try {
+    const j = await api('/api/admin/providers');
+    window._provs = j.providers;
+    view().innerHTML = `<div class="space-y-3">${btn('➕ Add provider', 'provAddSheet()')}<div class="space-y-3 stagger">${j.providers.map(p => `<div class="glass rounded-2xl p-4"><div class="flex justify-between items-center"><div class="font-extrabold">🔌 ${esc(p.name)} <span class="text-[11px] font-mono text-white/35">#${p.id}</span></div><button onclick="provToggle(${p.id})" class="toggle ${p.active ? 'on' : ''}"></button></div>
+      <div class="text-[11px] text-white/40 font-mono break-all mt-1">${esc(p.url)}</div><div class="text-[11px] text-white/40 font-mono">${esc(p.key)}</div>
+      <div class="flex items-center justify-between mt-3"><div id="pb${p.id}" class="font-mono font-bold text-sm text-white/60">—</div><button onclick="provBal(${p.id})" class="btn-soft rounded-lg px-3 py-1.5 text-xs font-bold">💰 Balance</button></div>
+      <div class="grid grid-cols-2 gap-2 mt-3"><button onclick="go('admin_prov_services',{id:${p.id},name:'${esc(p.name).replace(/'/g, '')}'})" class="grad-btn rounded-xl py-2.5 text-xs font-bold">📥 Add services</button><button onclick="provDelete(${p.id})" class="rounded-xl py-2.5 text-xs font-bold text-rose-300" style="background:rgba(244,63,94,.14);border:1px solid rgba(244,63,94,.3)">🗑 Delete</button></div></div>`).join('') || empty('🔌', 'No providers yet', 'Add your first provider above.')}</div></div>`;
+  } catch (e) { view().innerHTML = empty('🛠️', esc(e.message)); }
+}
+async function provBal(id) { const el = $('#pb' + id); el.innerHTML = '<span class="spinner"></span>'; try { const j = await api(`/api/admin/provider/${id}/balance`); el.textContent = j.balance + ' ' + j.currency; el.className = 'font-mono font-bold text-sm text-emerald-300'; } catch (e) { el.textContent = e.message; el.className = 'text-xs text-rose-300'; } }
+async function provToggle(id) { try { await api(`/api/admin/provider/${id}/toggle`, { body: {} }); vAdminProviders(); } catch (e) { toast(e.message, 'err'); } }
+
+/* --- admin broadcast --- */
+function vAdminBroadcast() {
+  if (!adminGuard()) return; setTop('Broadcast', 'Message all users', true);
+  view().innerHTML = `<div class="glass rounded-3xl p-5 animate-rise"><div class="big-ico mx-auto mb-2">📣</div><div class="font-extrabold text-xl">Send to everyone</div><div class="text-xs text-white/50 mt-1">HTML tags like &lt;b&gt; &lt;i&gt; are supported.</div>
+    <textarea id="bcTxt" rows="6" placeholder="Write your announcement…" class="field w-full rounded-2xl px-4 py-3 mt-4 text-sm"></textarea><div class="mt-4">${btn('Send broadcast 🚀', 'bcSend(this)')}</div></div>`;
+}
+async function bcSend(el) { if (!confirm('Send this message to all users?')) return; await withBtn(el, async () => { try { const j = await api('/api/admin/broadcast', { body: { text: $('#bcTxt').value } }); toast(`Broadcasting to ${j.total} users…`, 'ok'); } catch (e) { toast(e.message, 'err'); } }); }
+
+/* --- admin settings --- */
+const TOGGLE_LABELS = { MAINTENANCE_MODE: '🛠️ Full maintenance', MAINT_NEW_ORDER: '📦 Maintenance · new orders', MAINT_ADD_BALANCE: '💰 Maintenance · add balance', MAINT_SERVICE: '🛍️ Maintenance · services',
+  PAY_UPI_AUTO_ENABLED: '⚡ UPI 1 (auto)', PAY_UPI_MANUAL_ENABLED: '🏦 UPI 2 (manual)', PAY_USDT_ENABLED: '🪙 USDT payments', REFERRAL_ENABLED: '🤝 Referral program', LOG_CHANNEL_ENABLED: '📢 Log channel' };
+async function vAdminSettings() {
+  if (!adminGuard()) return; setTop('Settings', 'Store configuration', true); view().innerHTML = skel(4);
+  try {
+    const j = await api('/api/admin/settings'), s = j.settings, cats = (await api('/api/admin/categories')).categories;
+    view().innerHTML = `<div class="space-y-4 stagger">
+      <div class="glass rounded-3xl p-4 space-y-3.5">${j.toggles.map(k => `<div class="flex items-center justify-between gap-3"><span class="text-sm font-semibold">${TOGGLE_LABELS[k] || k}</span><button onclick="setTog('${k}',${s[k] === '1' ? 0 : 1})" class="toggle ${s[k] === '1' ? 'on' : ''}"></button></div>`).join('')}</div>
+      <div class="glass rounded-3xl p-4 space-y-3"><div class="font-extrabold text-sm">🎯 Pricing & discount</div>
+        <div class="grid grid-cols-2 gap-2"><div><label class="text-[10px] text-white/50 font-bold">MARKUP %</label><input id="dMk" type="number" value="${esc(s.GLOBAL_MARKUP_PERCENT)}" class="field w-full rounded-xl px-3 py-2.5 font-mono text-sm mt-1"></div><div><label class="text-[10px] text-white/50 font-bold">DISCOUNT %</label><input id="dDs" type="number" value="${esc(s.GLOBAL_DISCOUNT_PERCENT)}" class="field w-full rounded-xl px-3 py-2.5 font-mono text-sm mt-1"></div></div>
+        <div class="flex items-center justify-between"><span class="text-sm font-semibold">Discount active</span><button id="dOn" onclick="this.classList.toggle('on')" class="toggle ${s.DISCOUNT_ENABLED === '1' ? 'on' : ''}"></button></div>${btn('Save pricing', 'saveDisc(this)')}</div>
+      <div class="glass rounded-3xl p-4 space-y-3"><div class="font-extrabold text-sm">⚙️ Values</div>${j.values.map(k => `<div><label class="text-[10px] text-white/50 font-bold">${k}</label><div class="flex gap-2 mt-1"><input id="sv_${k}" value="${esc(s[k])}" class="field flex-1 rounded-xl px-3 py-2.5 text-xs font-mono"><button onclick="saveVal('${k}')" class="btn-soft rounded-xl px-4 text-xs font-bold">Save</button></div></div>`).join('')}</div>
+      <div class="glass rounded-3xl p-4 space-y-3"><div class="font-extrabold text-sm">🏷️ Categories</div>${cats.map(c => `<div class="flex items-center justify-between gap-3"><span class="text-sm">${esc(c.icon)} ${esc(c.name)} <span class="text-[10px] text-white/35">${c.count}</span></span><button onclick="catTog(${c.id})" class="toggle ${c.active ? 'on' : ''}"></button></div>`).join('') || '<div class="text-sm text-white/40">No categories</div>'}</div></div>`;
+  } catch (e) { view().innerHTML = empty('🛠️', esc(e.message)); }
+}
+async function setTog(k, v) { try { await api('/api/admin/setting', { body: { key: k, value: String(v) } }); await refreshMe(); vAdminSettings(); } catch (e) { toast(e.message, 'err'); } }
+async function saveVal(k) { try { await api('/api/admin/setting', { body: { key: k, value: $('#sv_' + k).value } }); toast('Saved', 'ok'); await refreshMe(); } catch (e) { toast(e.message, 'err'); } }
+async function saveDisc(el) { await withBtn(el, async () => { try { await api('/api/admin/discount', { body: { markup: $('#dMk').value, discount: $('#dDs').value, enabled: $('#dOn').classList.contains('on') } }); toast('Saved — run “Recalculate prices” in Services to apply', 'ok'); await refreshMe(); } catch (e) { toast(e.message, 'err'); } }); }
+async function catTog(id) { try { await api(`/api/admin/category/${id}/toggle`, { body: {} }); await refreshMe(); vAdminSettings(); } catch (e) { toast(e.message, 'err'); } }
+
+
+/* --- admin: add provider / services / categories --- */
+function provAddSheet() {
+  sheet(`<div class="font-extrabold text-xl mb-1">Add provider</div><div class="text-xs text-white/50 mb-4">Connect an SMM panel API (v2 format).</div>
+    <div class="space-y-3"><input id="pvName" placeholder="Provider name" class="field w-full rounded-2xl px-4 py-3.5 text-sm">
+    <input id="pvUrl" type="url" placeholder="https://panel.com/api/v2" class="field w-full rounded-2xl px-4 py-3.5 text-sm font-mono">
+    <input id="pvKey" placeholder="API key" class="field w-full rounded-2xl px-4 py-3.5 text-sm font-mono">
+    <button onclick="provAddGo(this)" class="grad-btn w-full rounded-2xl py-3.5 font-bold">Add provider</button></div>`);
+}
+async function provAddGo(el) {
+  await withBtn(el, async () => {
+    try {
+      const j = await api('/api/admin/provider', { body: { name: $('#pvName').value, url: $('#pvUrl').value, key: $('#pvKey').value } });
+      closeSheet();
+      toast(j.check.ok ? `Provider added · balance ${j.check.balance} ${j.check.currency}` : 'Provider added, but the API check failed: ' + (j.check.error || 'unknown'), j.check.ok ? 'ok' : 'info');
+      vAdminProviders();
+    } catch (e) { toast(e.message, 'err'); }
+  });
+}
+function provDelete(id) {
+  sheet(`<div class="text-center"><div class="big-ico mx-auto mb-2">🗑️</div><div class="font-extrabold text-xl">Delete provider #${id}?</div><div class="text-white/55 text-sm mt-1">All services from this provider will be removed from the catalog. Past orders stay intact.</div>
+    <div class="grid grid-cols-2 gap-3 mt-5">${btn('Keep', 'closeSheet()', 'btn-soft')}<button onclick="provDeleteGo(this,${id})" class="rounded-2xl py-3.5 font-bold text-rose-200" style="background:rgba(244,63,94,.3);border:1px solid rgba(244,63,94,.5)">Delete</button></div></div>`);
+}
+async function provDeleteGo(el, id) { await withBtn(el, async () => { try { await api(`/api/admin/provider/${id}/delete`, { body: {} }); closeSheet(); toast('Provider deleted', 'ok'); vAdminProviders(); } catch (e) { toast(e.message, 'err'); } }); }
+
+function svcDelete(id) {
+  sheet(`<div class="text-center"><div class="big-ico mx-auto mb-2">🗑️</div><div class="font-extrabold text-xl">Delete service #${id}?</div><div class="text-white/55 text-sm mt-1">It will be removed from the catalog. Past orders stay intact.</div>
+    <div class="grid grid-cols-2 gap-3 mt-5">${btn('Keep', 'closeSheet()', 'btn-soft')}<button onclick="svcDeleteGo(this,${id})" class="rounded-2xl py-3.5 font-bold text-rose-200" style="background:rgba(244,63,94,.3);border:1px solid rgba(244,63,94,.5)">Delete</button></div></div>`);
+}
+async function svcDeleteGo(el, id) { await withBtn(el, async () => { try { await api(`/api/admin/service/${id}/delete`, { body: {} }); closeSheet(); toast('Service deleted', 'ok'); drawAS(1); } catch (e) { toast(e.message, 'err'); } }); }
+
+async function vAdminAddService() {
+  if (!adminGuard()) return; setTop('Add Service', 'Choose a provider', true); view().innerHTML = skel(3);
+  try {
+    const j = await api('/api/admin/providers');
+    view().innerHTML = `<div class="space-y-3 stagger"><div class="glass rounded-3xl p-5 text-center"><div class="big-ico mx-auto mb-2">➕</div><div class="font-extrabold text-lg">Pick a provider</div><div class="text-xs text-white/50 mt-1">Browse its catalog and add services with your own pricing.</div></div>
+      ${j.providers.map(p => `<button onclick="go('admin_prov_services',{id:${p.id},name:'${esc(p.name).replace(/'/g, '')}'})" class="glass rounded-2xl p-4 w-full text-left card-hover flex items-center gap-3 ${p.active ? '' : 'opacity-50'}"><span class="text-2xl">🔌</span><div class="flex-1"><div class="font-bold">${esc(p.name)}</div><div class="text-[11px] text-white/40 font-mono">#${p.id}${p.active ? '' : ' · disabled'}</div></div><span class="text-white/30 text-xl">›</span></button>`).join('')}
+      ${btn('🔌 Add new provider', 'provAddSheet()', 'btn-soft')}</div>`;
+    if (!j.providers.length) view().innerHTML = `<div>${empty('🔌', 'No providers yet', 'Add a provider first.')}${btn('➕ Add provider', 'provAddSheet()')}</div>`;
+  } catch (e) { view().innerHTML = empty('🛠️', esc(e.message)); }
+}
+
+const PS = { sel: new Set(), items: {}, q: '', page: 1, pages: 1 };
+function vAdminProvServices() {
+  if (!adminGuard()) return; setTop(S.params.name || 'Provider', 'Select services to add', true);
+  PS.sel = new Set(); PS.items = {}; PS.q = ''; PS.page = 1;
+  view().innerHTML = `<div class="space-y-3"><div class="flex gap-2"><input id="psq" placeholder="Search name / ID / category" onkeydown="if(event.key==='Enter'){PS.q=this.value;psLoad(1)}" class="field flex-1 rounded-2xl px-4 py-3 text-sm"><button onclick="psLoad(1,true)" class="btn-soft rounded-2xl px-4 font-bold" title="Refresh">🔄</button></div>
+    <div id="psl">${skel(5)}</div><div id="psb" class="fixed bottom-24 inset-x-0 px-4 z-40 pointer-events-none"></div></div>`;
+  psLoad(1);
+}
+async function psLoad(page, refresh) {
+  PS.q = ($('#psq') && $('#psq').value) || PS.q; PS.page = page;
+  const box = $('#psl'); if (page === 1) box.innerHTML = skel(5);
+  try {
+    const j = await api(`/api/admin/provider/${S.params.id}/services?page=${page}&q=${encodeURIComponent(PS.q)}${refresh ? '&refresh=1' : ''}`);
+    PS.pages = j.pages;
+    j.items.forEach(i => PS.items[i.sid] = i);
+    const rows = j.items.map(i => `<button onclick="psToggle('${esc(i.sid)}')" id="ps_${esc(i.sid)}" class="glass rounded-2xl p-3.5 text-left w-full block ${i.exists ? 'opacity-50' : ''}">
+      <div class="flex gap-3 items-start"><div class="w-6 h-6 rounded-lg border border-white/20 flex items-center justify-center text-xs shrink-0 mt-0.5 ${PS.sel.has(i.sid) ? 'chip-on' : ''}" data-ck>${PS.sel.has(i.sid) ? '✓' : ''}</div>
+      <div class="flex-1 min-w-0"><div class="text-[11px] font-mono text-white/35">ID ${esc(i.sid)}${i.category ? ' · ' + esc(i.category) : ''}</div><div class="font-bold text-sm leading-snug line-clamp-2">${esc(i.name)}</div>
+      <div class="flex gap-2 mt-1.5 text-[11px]"><span class="font-mono grad-text font-bold">₹${esc(i.rate)}/1K</span><span class="text-white/40 font-mono">${num(i.min)}–${num(i.max)}</span>${i.exists ? '<span class="text-emerald-300 font-bold">✓ added #' + i.exists + '</span>' : ''}</div></div></div></button>`).join('');
+    if (page === 1) box.innerHTML = `<div class="text-xs text-white/40 mb-2">${j.total} services found · tap to select</div><div id="psrows" class="space-y-2.5"></div><div id="psmore" class="mt-3"></div>`;
+    $('#psrows').insertAdjacentHTML('beforeend', rows || (page === 1 ? empty('🔍', 'No services found') : ''));
+    $('#psmore').innerHTML = page < j.pages ? btn('Load more', `psLoad(${page + 1})`, 'btn-soft') : '';
+    psBar();
+  } catch (e) { box.innerHTML = empty('🛠️', esc(e.message)); }
+}
+function psToggle(sid) {
+  if (PS.items[sid] && PS.items[sid].exists) return toast('This service is already in your catalog', 'info');
+  haptic(); PS.sel.has(sid) ? PS.sel.delete(sid) : PS.sel.add(sid);
+  const el = document.getElementById('ps_' + sid);
+  if (el) { const ck = el.querySelector('[data-ck]'); const on = PS.sel.has(sid); ck.textContent = on ? '✓' : ''; ck.classList.toggle('chip-on', on); }
+  psBar();
+}
+function psBar() {
+  const n = PS.sel.size;
+  $('#psb').innerHTML = n ? `<div class="max-w-xl mx-auto pointer-events-auto animate-rise"><button onclick="psAddSheet()" class="grad-btn w-full rounded-2xl py-4 font-extrabold shadow-2xl">Add ${n} selected service${n > 1 ? 's' : ''} →</button></div>` : '';
+}
+async function psAddSheet() {
+  const ids = [...PS.sel]; if (!ids.length) return;
+  let cats = [];
+  try { cats = (await api('/api/admin/categories')).categories.filter(c => c.active); } catch (e) { return toast(e.message, 'err'); }
+  const one = ids.length === 1 ? PS.items[ids[0]] : null;
+  sheet(`<div class="font-extrabold text-xl mb-1">Add ${ids.length} service${ids.length > 1 ? 's' : ''}</div><div class="text-xs text-white/50 mb-4">Choose a category and your pricing.</div>
+    <div class="space-y-3">
+      ${cats.length ? `<select id="asCat" class="field w-full rounded-2xl px-4 py-3.5 text-sm bg-transparent">${cats.map(c => `<option value="${c.id}" style="color:#000">${esc(c.icon)} ${esc(c.name)}</option>`).join('')}</select>` :
+        `<div class="rounded-2xl p-3.5 text-sm text-amber-200" style="background:rgba(251,191,36,.12);border:1px solid rgba(251,191,36,.3)">No active category yet. Create one first.</div>${btn('🏷️ Create category', "closeSheet();go('admin_categories')", 'btn-soft')}`}
+      <div class="grid grid-cols-2 gap-2"><button id="pmP" onclick="pmSet('percent')" class="btn-soft chip-on rounded-xl py-2.5 font-bold text-sm">📈 Markup %</button><button id="pmF" onclick="pmSet('fixed')" class="btn-soft rounded-xl py-2.5 font-bold text-sm">💵 Fixed rate</button></div>
+      <input id="asVal" type="number" inputmode="decimal" value="20" oninput="pmPrev()" class="field w-full rounded-2xl px-4 py-3.5 font-mono text-lg">
+      ${one ? `<div id="asPrev" class="text-xs text-white/55"></div><input id="asName" value="${esc(one.name)}" class="field w-full rounded-2xl px-4 py-3 text-sm"><textarea id="asDesc" rows="2" placeholder="Description (optional — provider description is used if empty)" class="field w-full rounded-2xl px-4 py-3 text-sm"></textarea>` : ''}
+      ${cats.length ? `<button onclick="psAddGo(this)" class="grad-btn w-full rounded-2xl py-3.5 font-bold">Add to catalog</button>` : ''}</div>`);
+  window._pm = 'percent'; pmPrev();
+}
+function pmSet(m) {
+  window._pm = m; $('#pmP').classList.toggle('chip-on', m === 'percent'); $('#pmF').classList.toggle('chip-on', m === 'fixed');
+  $('#asVal').value = m === 'percent' ? '20' : ''; $('#asVal').placeholder = m === 'percent' ? 'Markup %' : 'Selling rate ₹ per 1000'; pmPrev();
+}
+function pmPrev() {
+  const el = $('#asPrev'); if (!el) return; const it = PS.items[[...PS.sel][0]]; const v = parseFloat($('#asVal').value || 0); const r = parseFloat(it.rate || 0);
+  const sell = window._pm === 'fixed' ? v : r * (1 + v / 100);
+  el.innerHTML = `Provider ₹${r.toFixed(2)} → you sell at <b class="font-mono grad-text">₹${(sell || 0).toFixed(2)}</b> / 1000`;
+}
+async function psAddGo(el) {
+  const ids = [...PS.sel], one = ids.length === 1;
+  await withBtn(el, async () => {
+    try {
+      const j = await api('/api/admin/services/add', { body: { provider_id: S.params.id, provider_service_ids: ids, category_id: $('#asCat').value, mode: window._pm, value: $('#asVal').value,
+        name: one ? $('#asName').value : '', description: one ? $('#asDesc').value : null } });
+      closeSheet(); toast(`${j.added.length} service(s) added` + (j.skipped.length ? ` · ${j.skipped.length} skipped` : ''), 'ok');
+      PS.sel = new Set(); vAdminProvServices();
+    } catch (e) { toast(e.message, 'err'); }
+  });
+}
+
+async function vAdminCategories() {
+  if (!adminGuard()) return; setTop('Categories', 'Organise your catalog', true); view().innerHTML = skel(4);
+  try {
+    const j = await api('/api/admin/categories'); window._cats = j.categories;
+    view().innerHTML = `<div class="space-y-3"><div class="glass rounded-3xl p-4 space-y-2.5"><div class="font-extrabold text-sm">➕ New category</div>
+      <div class="flex gap-2"><input id="ncIcon" value="📁" maxlength="4" class="field w-16 rounded-xl px-2 py-3 text-center text-xl"><input id="ncName" placeholder="Category name" class="field flex-1 rounded-xl px-4 py-3 text-sm"></div>${btn('Create category', 'catAddGo(this)')}</div>
+      <div class="space-y-2.5 stagger">${j.categories.map(c => `<div class="glass rounded-2xl p-3.5 flex items-center gap-3"><div class="text-2xl w-10 text-center">${esc(c.icon)}</div><div class="flex-1 min-w-0"><div class="font-bold text-sm truncate">${esc(c.name)}</div><div class="text-[11px] text-white/40">${c.count} services · #${c.id}</div></div>
+        <button onclick="catEdit(${c.id})" class="btn-soft rounded-lg w-9 h-9">✏️</button><button onclick="catTog2(${c.id})" class="toggle ${c.active ? 'on' : ''}"></button><button onclick="catDelete(${c.id})" class="text-rose-300 text-lg w-8">🗑</button></div>`).join('') || empty('🏷️', 'No categories yet', 'Create your first one above.')}</div></div>`;
+  } catch (e) { view().innerHTML = empty('🛠️', esc(e.message)); }
+}
+async function catAddGo(el) { await withBtn(el, async () => { try { await api('/api/admin/category', { body: { name: $('#ncName').value, icon: $('#ncIcon').value } }); await refreshMe(); toast('Category created', 'ok'); vAdminCategories(); } catch (e) { toast(e.message, 'err'); } }); }
+async function catTog2(id) { try { await api(`/api/admin/category/${id}/toggle`, { body: {} }); await refreshMe(); vAdminCategories(); } catch (e) { toast(e.message, 'err'); } }
+function catEdit(id) {
+  const c = window._cats.find(x => x.id === id);
+  sheet(`<div class="font-extrabold text-xl mb-4">Edit category</div><div class="flex gap-2"><input id="ceIcon" value="${esc(c.icon)}" maxlength="4" class="field w-16 rounded-xl px-2 py-3 text-center text-xl"><input id="ceName" value="${esc(c.name)}" class="field flex-1 rounded-xl px-4 py-3 text-sm"></div><div class="mt-4"><button onclick="catEditGo(this,${id})" class="grad-btn w-full rounded-2xl py-3.5 font-bold">Save</button></div>`);
+}
+async function catEditGo(el, id) { await withBtn(el, async () => { try { await api(`/api/admin/category/${id}/edit`, { body: { name: $('#ceName').value, icon: $('#ceIcon').value } }); closeSheet(); await refreshMe(); toast('Saved', 'ok'); vAdminCategories(); } catch (e) { toast(e.message, 'err'); } }); }
+function catDelete(id) {
+  const c = window._cats.find(x => x.id === id);
+  sheet(`<div class="text-center"><div class="big-ico mx-auto mb-2">🗑️</div><div class="font-extrabold text-xl">Delete “${esc(c.name)}”?</div><div class="text-white/55 text-sm mt-1">${c.count ? `This category has <b>${c.count}</b> service(s). Deleting it will remove them too.` : 'This category is empty.'}</div>
+    <div class="grid grid-cols-2 gap-3 mt-5">${btn('Keep', 'closeSheet()', 'btn-soft')}<button onclick="catDeleteGo(this,${id},${c.count})" class="rounded-2xl py-3.5 font-bold text-rose-200" style="background:rgba(244,63,94,.3);border:1px solid rgba(244,63,94,.5)">Delete</button></div></div>`);
+}
+async function catDeleteGo(el, id, count) { await withBtn(el, async () => { try { await api(`/api/admin/category/${id}/delete`, { body: { with_services: count > 0 } }); closeSheet(); await refreshMe(); toast('Category deleted', 'ok'); vAdminCategories(); } catch (e) { toast(e.message, 'err'); } }); }
+
+/* ===================== boot ===================== */
+async function boot() {
+  if (!tg || !tg.initData) { showBlocked(); return; }
+  try {
+    tg.ready(); tg.expand();
+    try { tg.setHeaderColor('#f5f7fc'); tg.setBackgroundColor('#f5f7fc'); tg.disableVerticalSwipes && tg.disableVerticalSwipes(); } catch (e) {}
+    tg.BackButton.onClick(goBack);
+  } catch (e) {}
+  try {
+    const j = await api('/api/bootstrap');
+    S.boot = j; S.me = j.me;
+    $('#topbar').classList.remove('hidden'); $('#nav').classList.remove('hidden');
+    if (j.maintenance.full) {
+      $('#nav').classList.add('hidden');
+      view().innerHTML = `<div class="text-center pt-24 animate-pop"><div class="big-ico mx-auto mb-4">🛠️</div><div class="font-extrabold text-2xl">Under maintenance</div><div class="text-white/55 text-sm mt-2 px-8">We'll be back very soon. Please check again shortly.</div></div>`;
+      setTop(j.bot_name || 'SMM Panel', 'Maintenance', false); return;
+    }
+    const sp = (tg.initDataUnsafe && tg.initDataUnsafe.start_param) || '';
+    render();
+  } catch (e) {
+    if (!$('#blocked').classList.contains('flex')) view().innerHTML = empty('📡', 'Could not load', esc(e.message));
+  }
+}
+boot();
+</script>
+<script>
+(function(){
+const P={"home": "<path d=\"M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z\"/>", "bag": "<path d=\"M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z\"/><path d=\"M3 6h18\"/><path d=\"M16 10a4 4 0 0 1-8 0\"/>", "box": "<path d=\"m7.5 4.27 9 5.15\"/><path d=\"M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z\"/><path d=\"m3.3 7 8.7 5 8.7-5\"/><path d=\"M12 22V12\"/>", "wallet": "<path d=\"M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1\"/><path d=\"M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4\"/>", "user": "<path d=\"M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2\"/><circle cx=\"12\" cy=\"7\" r=\"4\"/>", "users": "<path d=\"M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2\"/><circle cx=\"9\" cy=\"7\" r=\"4\"/><path d=\"M22 21v-2a4 4 0 0 0-3-3.87\"/><path d=\"M16 3.13a4 4 0 0 1 0 7.75\"/>", "shield": "<path d=\"M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z\"/>", "gift": "<rect x=\"3\" y=\"8\" width=\"18\" height=\"4\" rx=\"1\"/><path d=\"M12 8v13\"/><path d=\"M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7\"/><path d=\"M7.5 8a2.5 2.5 0 0 1 0-5A4.8 8 0 0 1 12 8a4.8 8 0 0 1 4.5-5 2.5 2.5 0 0 1 0 5\"/>", "chat": "<path d=\"M7.9 20A9 9 0 1 0 4 16.1L2 22Z\"/>", "search": "<circle cx=\"11\" cy=\"11\" r=\"8\"/><path d=\"m21 21-4.3-4.3\"/>", "sparkles": "<path d=\"M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z\"/><path d=\"M20 3v4\"/><path d=\"M22 5h-4\"/><path d=\"M4 17v2\"/><path d=\"M5 18H3\"/>", "rocket": "<path d=\"M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z\"/><path d=\"m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z\"/><path d=\"M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0\"/><path d=\"M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5\"/>", "gem": "<path d=\"M6 3h12l4 6-10 13L2 9Z\"/><path d=\"M11 3 8 9l4 13 4-13-3-6\"/><path d=\"M2 9h20\"/>", "flame": "<path d=\"M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.07-2.14-.22-4.05 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.15.43-2.3 1-3a2.5 2.5 0 0 0 2.5 2.5z\"/>", "zap": "<path d=\"M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z\"/>", "star": "<polygon points=\"12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2\"/>", "target": "<circle cx=\"12\" cy=\"12\" r=\"10\"/><circle cx=\"12\" cy=\"12\" r=\"6\"/><circle cx=\"12\" cy=\"12\" r=\"2\"/>", "trophy": "<path d=\"M6 9H4.5a2.5 2.5 0 0 1 0-5H6\"/><path d=\"M18 9h1.5a2.5 2.5 0 0 0 0-5H18\"/><path d=\"M4 22h16\"/><path d=\"M10 14.66V17c0 .55-.47.98-1.21 1.21C7.85 18.75 7 20.24 7 22\"/><path d=\"M14 14.66V17c0 .55.47.98 1.21 1.21C16.15 18.75 17 20.24 17 22\"/><path d=\"M18 2H6v7a6 6 0 0 0 12 0V2Z\"/>", "lock": "<rect x=\"3\" y=\"11\" width=\"18\" height=\"11\" rx=\"2\"/><path d=\"M7 11V7a5 5 0 0 1 10 0v4\"/>", "checkc": "<path d=\"M21.801 10A10 10 0 1 1 17 3.335\"/><path d=\"m9 11 3 3L22 4\"/>", "check": "<path d=\"M20 6 9 17l-5-5\"/>", "xc": "<circle cx=\"12\" cy=\"12\" r=\"10\"/><path d=\"m15 9-6 6\"/><path d=\"m9 9 6 6\"/>", "ban": "<circle cx=\"12\" cy=\"12\" r=\"10\"/><path d=\"m4.9 4.9 14.2 14.2\"/>", "alert": "<path d=\"m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3\"/><path d=\"M12 9v4\"/><path d=\"M12 17h.01\"/>", "clock": "<circle cx=\"12\" cy=\"12\" r=\"10\"/><path d=\"M12 6v6l4 2\"/>", "wrench": "<path d=\"M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94z\"/>", "plug": "<path d=\"M12 22v-5\"/><path d=\"M9 8V2\"/><path d=\"M15 8V2\"/><path d=\"M18 8v5a4 4 0 0 1-4 4h-4a4 4 0 0 1-4-4V8Z\"/>", "plus": "<path d=\"M5 12h14\"/><path d=\"M12 5v14\"/>", "minus": "<path d=\"M5 12h14\"/>", "refresh": "<path d=\"M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8\"/><path d=\"M21 3v5h-5\"/><path d=\"M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16\"/><path d=\"M8 16H3v5\"/>", "list": "<rect x=\"8\" y=\"2\" width=\"8\" height=\"4\" rx=\"1\"/><path d=\"M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2\"/><path d=\"M12 11h4\"/><path d=\"M12 16h4\"/><path d=\"M8 11h.01\"/><path d=\"M8 16h.01\"/>", "tag": "<path d=\"M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z\"/><circle cx=\"7.5\" cy=\"7.5\" r=\".5\" fill=\"currentColor\"/>", "trash": "<path d=\"M3 6h18\"/><path d=\"M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6\"/><path d=\"M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2\"/>", "party": "<path d=\"M5.8 11.3 2 22l10.7-3.79\"/><path d=\"M4 3h.01\"/><path d=\"M22 8h.01\"/><path d=\"M15 2h.01\"/><path d=\"M22 20h.01\"/><path d=\"m22 2-2.24.75a2.9 2.9 0 0 0-1.96 3.12c.1.86-.57 1.63-1.45 1.63h-.38c-.86 0-1.6.6-1.76 1.44L14 10\"/><path d=\"m22 13-.82-.33c-.86-.34-1.82.2-1.98 1.11c-.11.7-.72 1.22-1.43 1.22H17\"/><path d=\"m11 2 .33.82c.34.86-.2 1.82-1.11 1.98C9.52 4.9 9 5.52 9 6.23V7\"/><path d=\"M11 13c1.93 1.93 2.83 4.17 2 5-.83.83-3.07-.07-5-2-1.93-1.93-2.83-4.17-2-5 .83-.83 3.07.07 5 2Z\"/>", "bank": "<line x1=\"3\" x2=\"21\" y1=\"22\" y2=\"22\"/><line x1=\"6\" x2=\"6\" y1=\"18\" y2=\"11\"/><line x1=\"10\" x2=\"10\" y1=\"18\" y2=\"11\"/><line x1=\"14\" x2=\"14\" y1=\"18\" y2=\"11\"/><line x1=\"18\" x2=\"18\" y1=\"18\" y2=\"11\"/><polygon points=\"12 2 20 7 4 7\"/>", "coins": "<circle cx=\"8\" cy=\"8\" r=\"6\"/><path d=\"M18.09 10.37A6 6 0 1 1 10.34 18\"/><path d=\"M7 6h1v4\"/><path d=\"m16.71 13.88.7.71-2.82 2.82\"/>", "card": "<rect width=\"20\" height=\"14\" x=\"2\" y=\"5\" rx=\"2\"/><line x1=\"2\" x2=\"22\" y1=\"10\" y2=\"10\"/>", "inbox": "<polyline points=\"22 12 16 12 14 15 10 15 8 12 2 12\"/><path d=\"M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z\"/>", "receipt": "<path d=\"M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z\"/><path d=\"M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8\"/><path d=\"M12 17.5v-11\"/>", "mega": "<path d=\"m3 11 18-5v12L3 14v-3z\"/><path d=\"M11.6 16.8a3 3 0 1 1-5.8-1.6\"/>", "handshake": "<path d=\"m11 17 2 2a1 1 0 1 0 3-3\"/><path d=\"m14 14 2.5 2.5a1 1 0 1 0 3-3l-3.88-3.88a3 3 0 0 0-4.24 0l-.88.88a1 1 0 1 1-3-3l2.81-2.81a5.79 5.79 0 0 1 7.06-.87l.47.28a2 2 0 0 0 1.42.25L21 4\"/><path d=\"m21 3 1 11h-2\"/><path d=\"M3 3 2 14l6.5 6.5a1 1 0 1 0 3-3\"/><path d=\"M3 4h8\"/>", "gear": "<path d=\"M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z\"/><circle cx=\"12\" cy=\"12\" r=\"3\"/>", "mail": "<rect width=\"20\" height=\"16\" x=\"2\" y=\"4\" rx=\"2\"/><path d=\"m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7\"/>", "pencil": "<path d=\"M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z\"/><path d=\"m15 5 4 4\"/>", "hand": "<path d=\"M18 11V6a2 2 0 0 0-4 0v5\"/><path d=\"M14 10V4a2 2 0 0 0-4 0v2\"/><path d=\"M10 10.5V6a2 2 0 0 0-4 0v8\"/><path d=\"M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15\"/>", "link": "<path d=\"M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71\"/><path d=\"M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71\"/>", "hash": "<line x1=\"4\" x2=\"20\" y1=\"9\" y2=\"9\"/><line x1=\"4\" x2=\"20\" y1=\"15\" y2=\"15\"/><line x1=\"10\" x2=\"8\" y1=\"3\" y2=\"21\"/><line x1=\"16\" x2=\"14\" y1=\"3\" y2=\"21\"/>", "phone": "<rect width=\"14\" height=\"20\" x=\"5\" y=\"2\" rx=\"2\" ry=\"2\"/><path d=\"M12 18h.01\"/>", "call": "<path d=\"M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z\"/>", "bars": "<line x1=\"12\" x2=\"12\" y1=\"20\" y2=\"10\"/><line x1=\"18\" x2=\"18\" y1=\"20\" y2=\"4\"/><line x1=\"6\" x2=\"6\" y1=\"20\" y2=\"16\"/>", "trend": "<polyline points=\"22 7 13.5 15.5 8.5 10.5 2 17\"/><polyline points=\"16 7 22 7 22 13\"/>", "upload": "<path d=\"M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4\"/><polyline points=\"17 8 12 3 7 8\"/><line x1=\"12\" x2=\"12\" y1=\"3\" y2=\"15\"/>", "download": "<path d=\"M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4\"/><polyline points=\"7 10 12 15 17 10\"/><line x1=\"12\" x2=\"12\" y1=\"15\" y2=\"3\"/>", "folder": "<path d=\"M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z\"/>", "radio": "<path d=\"M4.9 19.1C1 15.2 1 8.8 4.9 4.9\"/><path d=\"M7.8 16.2c-2.3-2.3-2.3-6.1 0-8.5\"/><circle cx=\"12\" cy=\"12\" r=\"2\"/><path d=\"M16.2 7.8c2.3 2.3 2.3 6.1 0 8.5\"/><path d=\"M19.1 4.9C23 8.8 23 15.1 19.1 19\"/>", "camera": "<path d=\"M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3z\"/><circle cx=\"12\" cy=\"13\" r=\"3\"/>", "play": "<polygon points=\"6 3 20 12 6 21 6 3\"/>", "send": "<path d=\"M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z\"/><path d=\"m21.854 2.147-10.94 10.939\"/>", "heart": "<path d=\"M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z\"/>", "eye": "<path d=\"M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0\"/><circle cx=\"12\" cy=\"12\" r=\"3\"/>", "thumb": "<path d=\"M7 10v12\"/><path d=\"M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2a3.13 3.13 0 0 1 3 3.88Z\"/>", "music": "<path d=\"M9 18V5l12-2v13\"/><circle cx=\"6\" cy=\"18\" r=\"3\"/><circle cx=\"18\" cy=\"16\" r=\"3\"/>"};
+const A={"🏠": "home", "🛍": "bag", "📦": "box", "💰": "wallet", "👛": "wallet", "💵": "coins", "💱": "coins", "🪙": "coins", "👤": "user", "👥": "users", "🛡": "shield", "🎁": "gift", "💬": "chat", "🔎": "search", "🔍": "search", "✨": "sparkles", "🚀": "rocket", "💎": "gem", "🔥": "flame", "⚡": "zap", "🌟": "star", "⭐": "star", "🎯": "target", "🏆": "trophy", "🔒": "lock", "✅": "checkc", "✓": "check", "✔": "check", "❌": "xc", "🚫": "ban", "⚠": "alert", "⏰": "clock", "⏳": "clock", "⏱": "clock", "🛠": "wrench", "🔌": "plug", "➕": "plus", "➖": "minus", "♻": "refresh", "🔄": "refresh", "📋": "list", "🏷": "tag", "🗑": "trash", "🎉": "party", "🏦": "bank", "💳": "card", "📭": "inbox", "🧾": "receipt", "📢": "mega", "📣": "mega", "🤝": "handshake", "⚙": "gear", "✉": "mail", "✏": "pencil", "👋": "hand", "🔗": "link", "🔢": "hash", "📱": "phone", "📞": "call", "📊": "bars", "📈": "trend", "📤": "upload", "📥": "download", "📁": "folder", "📡": "radio", "📸": "camera", "▶": "play", "✈": "send", "❤": "heart", "👁": "eye", "👍": "thumb", "🎵": "music"};
+const DOT={'🔴':'#ef4444','🟡':'#f59e0b','🔵':'#0ea5e9','🟢':'#10b981','🟠':'#f97316','⚪':'#cbd5e1'};
+const RE=/(?:\p{Extended_Pictographic}\uFE0F?(?:\u200D\p{Extended_Pictographic}\uFE0F?)*)|\u2713/gu;
+const RT=/\p{Extended_Pictographic}|\u2713/u;
+const SKIP=/^(OPTION|TEXTAREA|SCRIPT|STYLE|TITLE)$/;
+function mk(e){
+  const k=e.replace(/\uFE0F/g,'');
+  if(DOT[k]){const d=document.createElement('span');d.className='sdot';d.style.background=DOT[k];return d;}
+  const t=document.createElement('template');
+  t.innerHTML='<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">'+P[A[k]||'sparkles']+'</svg>';
+  return t.content.firstChild;
+}
+function conv(n){
+  const t=n.nodeValue; if(!t||!RT.test(t))return;
+  const p=n.parentNode; if(!p)return;
+  if(SKIP.test(p.nodeName)){ if(p.nodeName==='OPTION') n.nodeValue=t.replace(RE,'').trim(); return; }
+  const f=document.createDocumentFragment(); let last=0,m; RE.lastIndex=0;
+  while((m=RE.exec(t))){ if(m.index>last)f.appendChild(document.createTextNode(t.slice(last,m.index))); f.appendChild(mk(m[0])); last=m.index+m[0].length; }
+  if(last<t.length)f.appendChild(document.createTextNode(t.slice(last)));
+  p.replaceChild(f,n);
+}
+function scan(r){
+  if(r.nodeType===3){conv(r);return;}
+  const w=document.createTreeWalker(r,NodeFilter.SHOW_TEXT),a=[];
+  while(w.nextNode())a.push(w.currentNode);
+  a.forEach(conv);
+}
+scan(document.body);
+new MutationObserver(ms=>{for(const m of ms){
+  if(m.type==='characterData')scan(m.target);
+  else m.addedNodes.forEach(n=>{if(n.nodeType===1||n.nodeType===3)scan(n);});
+}}).observe(document.body,{childList:true,subtree:true,characterData:true});
+})();
+</script>
+</body>
+</html>
